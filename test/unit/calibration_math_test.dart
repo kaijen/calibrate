@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:callibrate/core/utils/calibration_math.dart';
+import 'package:calibrate/core/utils/calibration_math.dart';
 
 void main() {
   group('CalibrationStats.empty()', () {

@@ -4,7 +4,7 @@ Dieses Dokument ist in zwei Teile gegliedert:
 
 - **Teil 1** – Allgemeine Muster und Boilerplate für Flutter-Android-Projekte
   dieser Bauart; wiederverwendbar für ähnliche Apps.
-- **Teil 2** – Projektspezifische Rahmenbedingungen für Callibrate.
+- **Teil 2** – Projektspezifische Rahmenbedingungen für Calibrate.
 
 ---
 
@@ -143,7 +143,7 @@ class AppDatabase extends _$AppDatabase {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'callibrate.db'));
+    final file = File(p.join(dir.path, 'calibrate.db'));
     return NativeDatabase.createInBackground(file);
   });
 }
@@ -340,7 +340,7 @@ lokale `key.properties` (in `.gitignore`).
 
 ## Projektziel
 
-Callibrate ist eine Android-App (Flutter) zum Kalibrieren persönlicher
+Calibrate ist eine Android-App (Flutter) zum Kalibrieren persönlicher
 Wahrscheinlichkeitsschätzungen. Nutzer erfassen Vorhersagen zu beliebigen
 Ereignissen, schätzen deren Eintrittswahrscheinlichkeit und lösen sie auf.
 Statistiken zeigen, ob 70 %-Vorhersagen wirklich zu 70 % eintreten.
@@ -354,7 +354,7 @@ strukturierte Prognoseübungen (aleatorisch).
 ## Projektstruktur (aktuell)
 
 ```
-callibrate/
+calibrate/
 ├── CLAUDE.md
 ├── pubspec.yaml
 ├── pubspec.lock
@@ -576,7 +576,7 @@ Die Kategorie beeinflusst die Darstellung und kann separat ausgewertet werden.
 ## Paket-Setup (pubspec.yaml)
 
 ```yaml
-name: callibrate
+name: calibrate
 description: Kalibriere deine Wahrscheinlichkeitsschätzungen.
 publish_to: 'none'
 version: 0.1.0+1

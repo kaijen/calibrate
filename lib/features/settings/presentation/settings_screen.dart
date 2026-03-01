@@ -24,7 +24,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final now = DateTime.now();
       final date =
           '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-      final filename = 'callibrate_export_$date.json';
+      final filename = 'calibrate_export_$date.json';
 
       await Share.shareXFiles(
         [
@@ -34,7 +34,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             mimeType: 'application/json',
           ),
         ],
-        subject: 'Callibrate-Export',
+        subject: 'Calibrate-Export',
       );
     } catch (e) {
       if (mounted) {

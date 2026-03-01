@@ -282,7 +282,7 @@ String _rot13(String input) {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'callibrate.db'));
+    final file = File(p.join(dir.path, 'calibrate.db'));
     return NativeDatabase.createInBackground(file);
   });
 }

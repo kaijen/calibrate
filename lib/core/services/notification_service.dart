@@ -10,7 +10,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
-  static const _channelId = 'callibrate_deadlines';
+  static const _channelId = 'calibrate_deadlines';
   static const _channelName = 'Auflösungsfristen';
   static const _channelDesc =
       'Erinnert dich, wenn eine Vorhersage aufgelöst werden soll.';
