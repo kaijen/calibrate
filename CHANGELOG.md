@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-01
+
+### Added
+- Import now supports resolutions: questions with estimate and resolution
+  are marked resolved immediately; questions with a resolution but no
+  estimate show a "Lösung vorhanden" hint and auto-resolve after estimating (#4)
+- Export obfuscates resolution data with ROT13 + Base64 to prevent
+  accidental spoilers when sharing question sets (#4)
+
 ## [0.4.3] - 2026-03-01
 
 ### Fixed
@@ -102,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/callibrate/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/kaijen/callibrate/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/kaijen/callibrate/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/kaijen/callibrate/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/kaijen/callibrate/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/kaijen/callibrate/compare/v0.4.0...v0.4.1
