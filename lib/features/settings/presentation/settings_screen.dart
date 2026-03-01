@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -44,6 +46,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     } finally {
       if (mounted) setState(() => _exportLoading = false);
+    }
+  }
+
+  Future<void> _launchDocs() async {
+    final info = await PackageInfo.fromPlatform();
+    final version = info.version.replaceFirst(RegExp(r'^v'), '');
+    final uri = Uri.parse('https://kaijen.github.io/calibrate/$version/');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Dokumentation konnte nicht geöffnet werden.')),
+        );
+      }
     }
   }
 
@@ -111,6 +126,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   )
                 : null,
             onTap: _exportLoading ? null : _export,
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              'Hilfe',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.menu_book_outlined),
+            title: const Text('Dokumentation'),
+            subtitle: const Text('kaijen.github.io/calibrate'),
+            onTap: _launchDocs,
           ),
           const Divider(),
           const Padding(
