@@ -129,6 +129,56 @@ Der erste Build benötigt `just gen`, da `app_database.g.dart` nicht eingecheckt
 
 ---
 
+## Release-Signing
+
+Release-APKs müssen mit einem festen Keystore signiert sein, damit Android Updates über sideloading akzeptiert. Ohne das erscheint beim Installieren „Update not installed".
+
+### Keystore erstellen (einmalig)
+
+```sh
+keytool -genkey -v \
+  -keystore android/app/callibrate-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias callibrate
+```
+
+Die Datei `android/app/callibrate-release.jks` ist in `.gitignore` eingetragen und wird nie committed.
+
+### `key.properties` anlegen
+
+```
+# android/app/key.properties  –  nicht committen
+storePassword=<keystore-passwort>
+keyPassword=<key-passwort>
+keyAlias=callibrate
+storeFile=callibrate-release.jks
+```
+
+Danach funktioniert `just release` lokal mit dem eigenen Keystore.
+
+### CI (GitHub Actions)
+
+Der Keystore wird als Base64-Secret hinterlegt:
+
+```sh
+base64 -w 0 android/app/callibrate-release.jks
+```
+
+Vier Secrets in **Settings → Secrets and variables → Actions** anlegen:
+
+| Secret | Inhalt |
+|--------|--------|
+| `KEYSTORE_BASE64` | Base64-kodierter Keystore |
+| `STORE_PASSWORD` | Keystore-Passwort |
+| `KEY_ALIAS` | `callibrate` |
+| `KEY_PASSWORD` | Key-Passwort |
+
+Der Release-Workflow dekodiert den Keystore automatisch und signiert das APK damit.
+
+> **Hinweis:** Wer die App bereits mit dem alten Debug-Key installiert hat, muss sie einmal deinstallieren, bevor das erste korrekt signierte APK als Update eingespielt werden kann.
+
+---
+
 ## Lizenz
 
 MIT

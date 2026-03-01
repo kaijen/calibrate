@@ -28,7 +28,17 @@ jobs:
       - name: Code generieren (Drift)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Keystore bereitstellen
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode \
+            > android/app/callibrate-release.jks
+
       - name: Release-APK bauen
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_STORE_PATH: callibrate-release.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: flutter build apk --release --build-name="${{ github.ref_name }}" --build-number="${{ github.run_number }}"
 
       - name: APK umbenennen

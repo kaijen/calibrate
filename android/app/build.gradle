@@ -4,6 +4,12 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('app/key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace "dev.callibrate.app"
     compileSdk 36
@@ -14,6 +20,17 @@ android {
         targetSdk 36
         versionCode flutter.versionCode
         versionName flutter.versionName
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias'] ?: System.getenv('KEY_ALIAS')
+            keyPassword keystoreProperties['keyPassword'] ?: System.getenv('KEY_PASSWORD')
+            storeFile keystoreProperties['storeFile']
+                ? file(keystoreProperties['storeFile'])
+                : (System.getenv('KEY_STORE_PATH') ? file(System.getenv('KEY_STORE_PATH')) : null)
+            storePassword keystoreProperties['storePassword'] ?: System.getenv('STORE_PASSWORD')
+        }
     }
 
     compileOptions {
@@ -28,7 +45,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false
         }
