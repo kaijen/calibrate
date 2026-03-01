@@ -11,7 +11,7 @@ part 'app_database.g.dart';
 
 class Questions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get text => text()();
+  TextColumn get questionText => text().named('text')();
   TextColumn get category => text()(); // 'epistemic' | 'aleatory'
   TextColumn get tags => text().withDefault(const Constant('[]'))();
   TextColumn get source => text().nullable()();
@@ -200,7 +200,7 @@ class AppDatabase extends _$AppDatabase {
       final resolution = await getResolutionForQuestion(q.id);
       result.add({
         'id': q.id,
-        'text': q.text,
+        'text': q.questionText,
         'category': q.category,
         'tags': jsonDecode(q.tags),
         'source': q.source,

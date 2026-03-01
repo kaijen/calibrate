@@ -26,17 +26,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
       final filename = 'callibrate_export_$date.json';
 
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [
-            XFile.fromData(
-              utf8.encode(jsonString),
-              name: filename,
-              mimeType: 'application/json',
-            ),
-          ],
-          subject: 'Callibrate-Export',
-        ),
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            utf8.encode(jsonString),
+            name: filename,
+            mimeType: 'application/json',
+          ),
+        ],
+        subject: 'Callibrate-Export',
       );
     } catch (e) {
       if (mounted) {

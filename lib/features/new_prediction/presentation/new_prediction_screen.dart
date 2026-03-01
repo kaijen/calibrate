@@ -64,7 +64,7 @@ class _NewPredictionScreenState extends ConsumerState<NewPredictionScreen> {
     try {
       await db.insertQuestion(
         QuestionsCompanion.insert(
-          text: _textController.text.trim(),
+          questionText: _textController.text.trim(),
           category: _category,
           tags: drift.Value(jsonEncode(tags)),
           deadline: drift.Value(_deadline),

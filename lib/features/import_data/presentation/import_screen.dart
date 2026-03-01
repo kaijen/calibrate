@@ -218,7 +218,7 @@ class ImportScreen extends ConsumerWidget {
           final tagsJson = jsonEncode(q.tags);
           await db.insertQuestion(
             QuestionsCompanion.insert(
-              text: q.text,
+              questionText: q.text,
               category: file.category,
               tags: drift.Value(tagsJson),
               source: drift.Value(file.source),

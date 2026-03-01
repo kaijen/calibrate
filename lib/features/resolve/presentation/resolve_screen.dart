@@ -106,7 +106,7 @@ class _ResolveBodyState extends ConsumerState<_ResolveBody> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            q.text,
+            q.questionText,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),

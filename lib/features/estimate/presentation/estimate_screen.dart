@@ -77,7 +77,7 @@ class _EstimateBody extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            question.text,
+            question.questionText,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 32),

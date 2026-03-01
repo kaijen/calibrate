@@ -31,7 +31,7 @@ class PredictionCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      q.text,
+                      q.questionText,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
