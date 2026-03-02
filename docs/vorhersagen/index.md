@@ -10,7 +10,7 @@ Erfassen → Schätzen → Auflösen
 
 **Erfassen** – Frage formulieren, Kategorie und Typ festlegen. Optional direkt schätzen.
 
-**Schätzen** – Wahrscheinlichkeit eingeben. Je nach Typ: Slider (0–100 %), Ja/Nein mit Konfidenz, oder Intervall mit Konfidenz.
+**Schätzen** – Wahrscheinlichkeit eingeben. Je nach Typ: Slider (0–100 %), Ja/Nein mit Konfidenz, oder Intervall mit Konfidenz. Hat die Frage bereits eine Auflösung (z.B. beim Import von Trivia-Katalogen mit eingebetteter Antwort), erscheint nach dem Speichern sofort das Feedback-Sheet.
 
 **Auflösen** – Tatsächliches Ergebnis eintragen. Die App zeigt danach ein Feedback-Sheet mit dem Brier-Beitrag dieser Schätzung sowie dem aktuellen Brier Score und Log Loss über alle aufgelösten Vorhersagen.
 

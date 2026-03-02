@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../../core/providers.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/calibration_math.dart';
 import '../../../shared/widgets/probability_slider.dart';
 import '../../../shared/widgets/estimate_inputs.dart';
+import '../../../shared/widgets/feedback_sheet.dart';
 
 // Lokaler autoDispose-Provider – bleibt screen-privat
 
@@ -174,12 +176,60 @@ class _EstimateBody extends ConsumerWidget {
       ),
     );
     ref.invalidate(predictionsStreamProvider);
-    if (context.mounted) {
+
+    final resolution = await db.getResolutionForQuestion(question.id);
+    if (resolution != null && context.mounted) {
+      await _showFeedback(context, db, resolution, probability);
+      if (context.mounted) context.pop();
+    } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Schätzung gespeichert.')),
       );
       context.pop();
     }
+  }
+
+  Future<void> _showFeedback(
+    BuildContext context,
+    AppDatabase db,
+    Resolution resolution,
+    double probability,
+  ) async {
+    final allViews = await db.getAllPredictionViews();
+    if (!context.mounted) return;
+
+    final resolved = allViews
+        .where((v) => v.status == PredictionStatus.resolved)
+        .toList();
+    final type = question.predictionType;
+
+    List<({double probability, double outcome})> toPairs(
+            List<PredictionView> views) =>
+        views
+            .map((v) => (
+                  probability: v.estimate!.probability,
+                  outcome: v.resolution!.outcome ? 1.0 : 0.0,
+                ))
+            .toList();
+
+    final overallStats = CalibrationStats.compute(toPairs(resolved));
+    final typeResolved =
+        resolved.where((v) => v.question.predictionType == type).toList();
+    final typeStats = CalibrationStats.compute(toPairs(typeResolved));
+
+    final estimate = await db.getEstimateForQuestion(question.id);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => CalibrationFeedbackSheet(
+        outcome: resolution.outcome,
+        estimate: estimate,
+        predictionType: type,
+        overallStats: overallStats,
+        typeStats: typeStats,
+      ),
+    );
   }
 }
 
