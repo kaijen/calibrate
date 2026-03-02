@@ -173,6 +173,10 @@ class _ResolveBodyState extends ConsumerState<_ResolveBody> {
             _EstimateCard(estimate: estimate, type: type),
             const SizedBox(height: 24),
           ],
+          if (q.hasKnownAnswer && q.knownAnswer != null) ...[
+            _KnownAnswerCard(knownAnswer: q.knownAnswer!),
+            const SizedBox(height: 24),
+          ],
           if (type == 'interval') ...[
             _IntervalResolveInput(
               controller: _numericController,
@@ -269,6 +273,35 @@ class _EstimateCard extends StatelessWidget {
               .textTheme
               .titleMedium
               ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+}
+
+class _KnownAnswerCard extends StatelessWidget {
+  final bool knownAnswer;
+
+  const _KnownAnswerCard({required this.knownAnswer});
+
+  @override
+  Widget build(BuildContext context) {
+    final isYes = knownAnswer;
+
+    return Card(
+      color: isYes ? Colors.green.shade50 : Colors.red.shade50,
+      child: ListTile(
+        leading: Icon(
+          isYes ? Icons.check_circle : Icons.cancel,
+          color: isYes ? Colors.green.shade700 : Colors.red.shade700,
+        ),
+        title: const Text('Bekannte Antwort'),
+        trailing: Text(
+          isYes ? 'Ja' : 'Nein',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isYes ? Colors.green.shade700 : Colors.red.shade700,
+              ),
         ),
       ),
     );
