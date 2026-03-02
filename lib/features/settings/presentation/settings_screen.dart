@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -16,6 +18,15 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _exportLoading = false;
   bool _sharingExportLoading = false;
+  PackageInfo? _packageInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _packageInfo = info);
+    });
+  }
 
   Future<void> _export() async {
     setState(() => _exportLoading = true);
@@ -99,6 +110,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } finally {
       if (mounted) setState(() => _sharingExportLoading = false);
     }
+  }
+
+  Future<void> _shareDebugInfo() async {
+    final info = _packageInfo ?? await PackageInfo.fromPlatform();
+    final devicePlugin = DeviceInfoPlugin();
+    Map<String, dynamic> deviceMap;
+    try {
+      final android = await devicePlugin.androidInfo;
+      deviceMap = {
+        'platform': 'android',
+        'version': android.version.release,
+        'sdkInt': android.version.sdkInt,
+        'manufacturer': android.manufacturer,
+        'model': android.model,
+        'brand': android.brand,
+        'isPhysicalDevice': android.isPhysicalDevice,
+      };
+    } catch (_) {
+      deviceMap = {
+        'platform': Platform.operatingSystem,
+        'version': Platform.operatingSystemVersion,
+      };
+    }
+
+    final debugInfo = {
+      'app': {
+        'name': info.appName,
+        'packageName': info.packageName,
+        'version': info.version,
+        'buildNumber': info.buildNumber,
+      },
+      'device': deviceMap,
+      'exportedAt': DateTime.now().toIso8601String(),
+    };
+
+    final jsonString = const JsonEncoder.withIndent('  ').convert(debugInfo);
+    await Share.share(jsonString, subject: 'Calibrate Debug-Info');
   }
 
   Future<void> _launchDocs() async {
@@ -206,6 +254,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: const Text('Dokumentation'),
             subtitle: const Text('kaijen.github.io/calibrate'),
             onTap: _launchDocs,
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Version'),
+            subtitle: Text(_packageInfo != null
+                ? '${_packageInfo!.version} (Build ${_packageInfo!.buildNumber})'
+                : '…'),
+            trailing: IconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Debug-Info teilen',
+              onPressed: _shareDebugInfo,
+            ),
           ),
           const Divider(),
           const Padding(
