@@ -4,11 +4,19 @@ import '../../../core/database/app_database.dart';
 class PredictionCard extends StatelessWidget {
   final PredictionView prediction;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  /// null  = kein Auswahlmodus
+  /// false = nicht ausgewählt
+  /// true  = ausgewählt
+  final bool? selected;
 
   const PredictionCard({
     super.key,
     required this.prediction,
     this.onTap,
+    this.onLongPress,
+    this.selected,
   });
 
   @override
@@ -18,8 +26,12 @@ class PredictionCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      color: selected == true
+          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4)
+          : null,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -29,6 +41,15 @@ class PredictionCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (selected != null) ...[
+                    Checkbox(
+                      value: selected,
+                      onChanged: null,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   Expanded(
                     child: Text(
                       q.questionText,

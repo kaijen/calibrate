@@ -137,6 +137,10 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteQuestion(int id) =>
       (delete(questions)..where((q) => q.id.equals(id))).go();
 
+  Future<void> updateQuestionTags(int id, List<String> tags) =>
+      (update(questions)..where((q) => q.id.equals(id)))
+          .write(QuestionsCompanion(tags: Value(jsonEncode(tags))));
+
   // --- Estimates ---
 
   Future<Estimate?> getEstimateForQuestion(int questionId) =>
