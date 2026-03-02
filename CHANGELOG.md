@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-03-02
+
+### Added
+- Feedback sheet shown immediately after estimating a question that
+  already has a resolution (e.g. trivia imports with embedded answers);
+  same CalibrationFeedbackSheet as the resolve flow (#16)
+
 ## [0.13.0] - 2026-03-02
 
 ### Added
@@ -196,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/kaijen/calibrate/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/kaijen/calibrate/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/kaijen/calibrate/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/kaijen/calibrate/compare/v0.12.0...v0.12.1
