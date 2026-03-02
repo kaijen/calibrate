@@ -500,4 +500,63 @@ questions:
       expect(ex.toString(), contains('Testfehler'));
     });
   });
+
+  group('parseAutoDetect – Markdown-Code-Block-Extraktion', () {
+    const jsonPayload = '''
+{
+  "version": 1,
+  "category": "epistemic",
+  "questions": [{"text": "Frage aus Code-Block"}]
+}''';
+
+    const yamlPayload = '''version: 1
+category: epistemic
+questions:
+  - text: Frage aus YAML-Block''';
+
+    test('extrahiert JSON aus ```json-Block', () {
+      final content = '```json\n$jsonPayload\n```';
+      final result = ImportParser.parseAutoDetect(content);
+      expect(result.questions.first.text, 'Frage aus Code-Block');
+    });
+
+    test('extrahiert YAML aus ```yaml-Block', () {
+      final content = '```yaml\n$yamlPayload\n```';
+      final result = ImportParser.parseAutoDetect(content);
+      expect(result.questions.first.text, 'Frage aus YAML-Block');
+    });
+
+    test('extrahiert JSON aus ```yml-Block', () {
+      final content = '```yml\n$jsonPayload\n```';
+      final result = ImportParser.parseAutoDetect(content);
+      expect(result.questions.first.text, 'Frage aus Code-Block');
+    });
+
+    test('ignoriert umgebenden LLM-Text und nutzt ersten Code-Block', () {
+      final content = '''
+Hier sind deine Kalibrierungsfragen:
+
+```json
+$jsonPayload
+```
+
+**Import:** Text kopieren → Calibrate öffnen → Import
+''';
+      final result = ImportParser.parseAutoDetect(content);
+      expect(result.questions.first.text, 'Frage aus Code-Block');
+    });
+
+    test('JSON ohne Code-Block wird wie bisher geparst', () {
+      final result = ImportParser.parseAutoDetect(jsonPayload);
+      expect(result.questions.first.text, 'Frage aus Code-Block');
+    });
+
+    test('wirft Exception bei leerem Code-Block-Inhalt', () {
+      const content = 'Text\n```json\n{}\n```';
+      expect(
+        () => ImportParser.parseAutoDetect(content),
+        throwsA(isA<ImportParseException>()),
+      );
+    });
+  });
 }

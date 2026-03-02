@@ -95,7 +95,8 @@ class ImportParser {
     return _parseMap(data);
   }
 
-  /// Erkennt das Format automatisch – zuerst JSON, dann YAML.
+  /// Erkennt das Format automatisch – zuerst JSON, dann Markdown-Code-Block,
+  /// dann YAML.
   static ImportFile parseAutoDetect(String content) {
     final trimmed = content.trim();
     if (trimmed.isEmpty) {
@@ -111,6 +112,30 @@ class ImportParser {
       }
     }
 
+    // Markdown-Code-Block (```json / ```yaml / ```yml) extrahieren und parsen.
+    final extracted = _extractFromCodeBlock(trimmed);
+    if (extracted != null) {
+      if (extracted.startsWith('{')) {
+        try {
+          final data = jsonDecode(extracted) as Map<String, dynamic>;
+          return _parseMap(data);
+        } on FormatException catch (e) {
+          throw ImportParseException(
+              'Ungültiges JSON im Code-Block: ${e.message}');
+        }
+      }
+      try {
+        final yaml = loadYaml(extracted);
+        final data = _yamlToMap(yaml);
+        return _parseMap(data);
+      } on ImportParseException {
+        rethrow;
+      } catch (e) {
+        throw ImportParseException(
+            'Ungültiges YAML im Code-Block: $e');
+      }
+    }
+
     try {
       final yaml = loadYaml(trimmed);
       final data = _yamlToMap(yaml);
@@ -118,8 +143,20 @@ class ImportParser {
     } on ImportParseException {
       rethrow;
     } catch (e) {
-      throw ImportParseException('Inhalt konnte nicht als JSON oder YAML geparst werden: $e');
+      throw ImportParseException(
+          'Inhalt konnte nicht als JSON oder YAML geparst werden: $e');
     }
+  }
+
+  /// Gibt den Inhalt des ersten ```json```, ```yaml``` oder ```yml```-Blocks
+  /// zurück, oder null wenn keiner gefunden wurde.
+  static String? _extractFromCodeBlock(String content) {
+    final pattern = RegExp(
+      r'```(?:json|yaml|yml)[^\n]*\n([\s\S]*?)\n[ \t]*```',
+      caseSensitive: false,
+    );
+    final match = pattern.firstMatch(content);
+    return match?.group(1)?.trim();
   }
 
   static ImportFile _parseMap(Map<String, dynamic> data) {

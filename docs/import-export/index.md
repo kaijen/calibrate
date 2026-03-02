@@ -2,7 +2,7 @@
 
 ## Import
 
-Fragenkataloge lassen sich als JSON oder YAML importieren – per Dateiauswahl oder direkt aus der Zwischenablage. Die App erkennt das Format automatisch.
+Fragenkataloge lassen sich als JSON oder YAML importieren – per Dateiauswahl oder direkt aus der Zwischenablage. Die App erkennt das Format automatisch und extrahiert den Inhalt bei Bedarf aus einem Markdown-Code-Block (` ```json ` oder ` ```yaml `), sodass sich LLM-generierte Antworten direkt einfügen lassen.
 
 **Ablauf:**
 
