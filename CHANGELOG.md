@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-02
+
+### Added
+- Clipboard import now recognizes \`\`\`json and \`\`\`yaml fences;
+  LLM-generated output can be pasted directly without editing (#13)
+
 ## [0.9.0] - 2026-03-02
 
 ### Added
@@ -149,7 +155,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/kaijen/calibrate/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/kaijen/calibrate/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/kaijen/calibrate/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/kaijen/calibrate/compare/v0.7.0...v0.7.1
