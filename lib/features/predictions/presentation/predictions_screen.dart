@@ -99,6 +99,40 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
     return {for (final p in predictions) ...p.tagList};
   }
 
+  Future<void> _deleteSelected() async {
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Einträge löschen'),
+        content: Text(
+          '$count ${count == 1 ? 'Vorhersage wird' : 'Vorhersagen werden'} '
+          'endgültig gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final db = ref.read(appDatabaseProvider);
+    await db.deleteQuestions(_selectedIds.toList());
+    ref.invalidate(predictionsStreamProvider);
+    setState(() => _selectedIds.clear());
+  }
+
   Future<void> _editTags() async {
     final selected = _currentPredictions
         .where((p) => _selectedIds.contains(p.question.id))
@@ -150,6 +184,11 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
                   icon: const Icon(Icons.label_outline),
                   tooltip: 'Tags bearbeiten',
                   onPressed: _editTags,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Auswahl löschen',
+                  onPressed: _deleteSelected,
                 ),
               ]
             : null,

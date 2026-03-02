@@ -35,4 +35,5 @@ Durch langes Drücken auf eine Karte wechselt die Liste in den Auswahlmodus. Im 
 - Antippen einer Karte wählt sie aus oder ab.
 - **Alle auswählen** (Symbol in der AppBar) markiert alle aktuell sichtbaren Einträge des aktiven Tabs – bestehende Tag- und Tab-Filter bleiben dabei wirksam.
 - **Tags bearbeiten** (Label-Symbol) öffnet einen Dialog zum Setzen neuer Tags. Die eingegebenen Tags ersetzen die bisherigen Tags aller ausgewählten Vorhersagen. Vorhandene Tags werden als Vorschläge angeboten.
+- **Löschen** (Papierkorb-Symbol) löscht alle ausgewählten Vorhersagen nach einer Bestätigung endgültig – inklusive Schätzungen und Auflösungen.
 - Das **×**-Symbol in der AppBar oder ein Antippen einer nicht ausgewählten Karte hebt die Auswahl auf.
