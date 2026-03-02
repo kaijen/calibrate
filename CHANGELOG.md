@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-03-02
+
+### Fixed
+- Statistics tag filter replaced with FilterChips; the previous
+  autocomplete showed no options on empty input, making the filter
+  undiscoverable (#9)
+
 ## [0.12.1] - 2026-03-02
 
 ### Fixed
@@ -182,7 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/kaijen/calibrate/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/kaijen/calibrate/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/kaijen/calibrate/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/kaijen/calibrate/compare/v0.10.1...v0.11.0
