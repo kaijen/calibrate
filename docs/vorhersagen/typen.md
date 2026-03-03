@@ -32,7 +32,7 @@ confidenceLevel: 0.65
 
 ## Intervall (`interval`)
 
-Schätzung: Unter- und Obergrenze eines numerischen Bereichs, plus Konfidenz. Auflösung: tatsächlicher Messwert. Ergebnis ist wahr, wenn der Wert im Intervall liegt.
+Schätzung: Unter- und Obergrenze eines numerischen Bereichs, optionale Maßeinheit (z. B. km, °C) und Konfidenz. Auflösung: tatsächlicher Messwert. Ergebnis ist wahr, wenn der Wert im Intervall liegt.
 
 **Geeignet für:** Mengen, Maße und andere numerische Vorhersagen.
 

@@ -125,7 +125,16 @@ class PredictionCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        prediction.resolution!.outcome ? 'Ja' : 'Nein',
+                        () {
+                          final res = prediction.resolution!;
+                          if (prediction.question.predictionType == 'interval' &&
+                              res.numericOutcome != null) {
+                            final unit = prediction.estimate?.unit ?? '';
+                            final u = unit.isNotEmpty ? ' $unit' : '';
+                            return '${formatNum(res.numericOutcome)}$u';
+                          }
+                          return res.outcome ? 'Ja' : 'Nein';
+                        }(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: prediction.resolution!.outcome
                                   ? Colors.green

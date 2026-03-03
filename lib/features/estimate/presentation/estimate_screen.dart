@@ -28,8 +28,8 @@ class EstimateScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Schätzung abgeben')),
-      body: FutureBuilder<Question>(
-        future: db.getQuestion(questionId),
+      body: FutureBuilder<(Question, Estimate?)>(
+        future: _load(db),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -37,30 +37,60 @@ class EstimateScreen extends ConsumerWidget {
           if (snapshot.hasError) {
             return Center(child: Text('Fehler: ${snapshot.error}'));
           }
-          final question = snapshot.data!;
-          return _EstimateBody(question: question);
+          final (question, existing) = snapshot.data!;
+          return _EstimateBody(question: question, existingEstimate: existing);
         },
       ),
     );
+  }
+
+  Future<(Question, Estimate?)> _load(AppDatabase db) async {
+    final question = await db.getQuestion(questionId);
+    final estimate = await db.getEstimateForQuestion(questionId);
+    return (question, estimate);
   }
 }
 
 // --- Body ---
 
-class _EstimateBody extends ConsumerWidget {
+class _EstimateBody extends ConsumerStatefulWidget {
   final Question question;
+  final Estimate? existingEstimate;
 
-  const _EstimateBody({required this.question});
+  const _EstimateBody({required this.question, this.existingEstimate});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_EstimateBody> createState() => _EstimateBodyState();
+}
+
+class _EstimateBodyState extends ConsumerState<_EstimateBody> {
+  late final TextEditingController _unitController;
+
+  @override
+  void initState() {
+    super.initState();
+    _unitController = TextEditingController(
+      text: widget.existingEstimate?.unit ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _unitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(_estimateProvider);
     final notifier = ref.read(_estimateProvider.notifier);
     final db = ref.watch(appDatabaseProvider);
-    final type = question.predictionType;
+    final type = widget.question.predictionType;
 
     final categoryLabel =
-        question.category == 'epistemic' ? 'Epistemisch' : 'Aleatorisch';
+        widget.question.category == 'epistemic' ? 'Epistemisch' : 'Aleatorisch';
+
+    final unit = _unitController.text.trim();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -82,7 +112,7 @@ class _EstimateBody extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            question.questionText,
+            widget.question.questionText,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 32),
@@ -99,9 +129,20 @@ class _EstimateBody extends ConsumerWidget {
           ] else if (type == 'binary') ...[
             BinaryEstimateInput(state: state, notifier: notifier),
           ] else if (type == 'interval') ...[
+            TextField(
+              controller: _unitController,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(
+                labelText: 'Einheit (optional)',
+                hintText: 'z.B. m, °C, kg',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
             IntervalEstimateInput(
               state: state,
               notifier: notifier,
+              unit: unit.isEmpty ? null : unit,
             ),
           ],
           const SizedBox(height: 48),
@@ -114,7 +155,7 @@ class _EstimateBody extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _InfoCard(category: question.category),
+          _InfoCard(category: widget.question.category),
         ],
       ),
     );
@@ -155,6 +196,7 @@ class _EstimateBody extends ConsumerWidget {
     drift.Value<double?> lowerBound = const drift.Value(null);
     drift.Value<double?> upperBound = const drift.Value(null);
     drift.Value<bool?> binaryChoice = const drift.Value(null);
+    drift.Value<String?> unit = const drift.Value(null);
 
     if (type == 'binary') {
       binaryChoice = drift.Value(state.binaryChoice!);
@@ -163,27 +205,30 @@ class _EstimateBody extends ConsumerWidget {
       final upper = double.parse(state.upperBoundText.replaceAll(',', '.'));
       lowerBound = drift.Value(lower);
       upperBound = drift.Value(upper);
+      final unitText = _unitController.text.trim();
+      if (unitText.isNotEmpty) unit = drift.Value(unitText);
     }
 
     await db.upsertEstimate(
       EstimatesCompanion.insert(
-        questionId: question.id,
+        questionId: widget.question.id,
         probability: probability,
         confidenceLevel: drift.Value(state.confidenceLevel),
         lowerBound: lowerBound,
         upperBound: upperBound,
         binaryChoice: binaryChoice,
+        unit: unit,
       ),
     );
     ref.invalidate(predictionsStreamProvider);
 
-    final resolution = await db.getResolutionForQuestion(question.id);
+    final resolution = await db.getResolutionForQuestion(widget.question.id);
     if (resolution != null && context.mounted) {
       // Für Intervall-Typ: Outcome anhand der neuen Grenzen + gespeichertem
       // Messwert neu berechnen, da die ursprüngliche Auflösung andere Grenzen
       // hatte.
       bool effectiveOutcome = resolution.outcome;
-      if (question.predictionType == 'interval' &&
+      if (widget.question.predictionType == 'interval' &&
           resolution.numericOutcome != null) {
         final lower = lowerBound.value;
         final upper = upperBound.value;
@@ -191,7 +236,7 @@ class _EstimateBody extends ConsumerWidget {
           final actual = resolution.numericOutcome!;
           effectiveOutcome = actual >= lower && actual <= upper;
           if (effectiveOutcome != resolution.outcome) {
-            await db.updateResolutionOutcome(question.id, effectiveOutcome);
+            await db.updateResolutionOutcome(widget.question.id, effectiveOutcome);
           }
         }
       }
@@ -218,7 +263,7 @@ class _EstimateBody extends ConsumerWidget {
     final resolved = allViews
         .where((v) => v.status == PredictionStatus.resolved)
         .toList();
-    final type = question.predictionType;
+    final type = widget.question.predictionType;
 
     List<({double probability, double outcome})> toPairs(
             List<PredictionView> views) =>
@@ -234,7 +279,7 @@ class _EstimateBody extends ConsumerWidget {
         resolved.where((v) => v.question.predictionType == type).toList();
     final typeStats = CalibrationStats.compute(toPairs(typeResolved));
 
-    final estimate = await db.getEstimateForQuestion(question.id);
+    final estimate = await db.getEstimateForQuestion(widget.question.id);
 
     await showModalBottomSheet<void>(
       context: context,
