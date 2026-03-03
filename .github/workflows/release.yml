@@ -57,5 +57,6 @@ jobs:
         with:
           name: Kailibrate ${{ github.ref_name }}
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: build/app/outputs/flutter-apk/kailibrate-${{ github.ref_name }}.apk
           fail_on_unmatched_files: true
