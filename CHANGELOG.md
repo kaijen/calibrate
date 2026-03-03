@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-03-03
+
+### Added
+- Tap any chart on the statistics screen to open it fullscreen in
+  landscape orientation for easier reading (#27)
+
 ## [0.16.1] - 2026-03-03
 
 ### Fixed
@@ -273,7 +279,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/kaijen/calibrate/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/kaijen/calibrate/compare/v0.16.1...v0.17.0
 [0.16.1]: https://github.com/kaijen/calibrate/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/kaijen/calibrate/compare/v0.15.6...v0.16.0
 [0.15.6]: https://github.com/kaijen/calibrate/compare/v0.15.5...v0.15.6
