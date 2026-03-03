@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:share_plus/share_plus.dart';
 import '../../../core/database/app_database.dart';
@@ -51,6 +52,16 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
         if (templates.isNotEmpty &&
             ref.read(aiGeneratorProvider).selectedTemplate == null) {
           notifier.selectTemplate(templates.first);
+        }
+      });
+    });
+
+    // Auto-select first model when model list loads
+    ref.listen(modelListProvider, (_, next) {
+      next.whenData((models) {
+        if (models.isNotEmpty &&
+            ref.read(aiGeneratorProvider).selectedModel == null) {
+          notifier.setModel(models.first);
         }
       });
     });
@@ -131,6 +142,30 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
             },
           ),
           const SizedBox(height: 20),
+          Text('Modell', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 8),
+          ref.watch(modelListProvider).when(
+            loading: () => const LinearProgressIndicator(),
+            error: (e, _) => Text('Fehler beim Laden der Modelle: $e'),
+            data: (models) => DropdownButtonFormField<String>(
+              value: genState.selectedModel,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              items: models
+                  .map((m) => DropdownMenuItem(
+                        value: m,
+                        child: Text(m, overflow: TextOverflow.ellipsis),
+                      ))
+                  .toList(),
+              onChanged: (m) {
+                if (m != null) notifier.setModel(m);
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
           TextField(
             controller: _topicController,
             decoration: const InputDecoration(
@@ -154,7 +189,9 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
             child: FilledButton.icon(
               icon: const Icon(Icons.auto_awesome),
               label: const Text('Generieren'),
-              onPressed: (!_hasApiKey || genState.selectedTemplate == null)
+              onPressed: (!_hasApiKey ||
+                          genState.selectedTemplate == null ||
+                          genState.selectedModel == null)
                   ? null
                   : () => notifier.generate(_topicController.text),
             ),
@@ -182,10 +219,10 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
               color: Theme.of(context).colorScheme.onErrorContainer),
         ),
         trailing: TextButton(
-          onPressed: () =>
-              Navigator.of(context).pushNamed('/settings').then((_) {
+          onPressed: () async {
+            await context.push('/settings');
             _checkApiKey();
-          }),
+          },
           child: const Text('Einstellungen'),
         ),
       ),
@@ -233,17 +270,7 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
                   margin: const EdgeInsets.only(bottom: 4),
                   child: ListTile(
                     dense: true,
-                    leading: q.resolution != null
-                        ? Icon(
-                            q.resolution!.outcome
-                                ? Icons.check
-                                : Icons.close,
-                            color: q.resolution!.outcome
-                                ? Colors.green
-                                : Colors.red,
-                            size: 20,
-                          )
-                        : const Icon(Icons.question_mark, size: 20),
+                    leading: const Icon(Icons.question_mark, size: 20),
                     title: Text(q.text,
                         style: Theme.of(context).textTheme.bodyMedium),
                     subtitle: q.tags.isNotEmpty
