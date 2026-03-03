@@ -36,6 +36,6 @@ Ablauf:
 3. Optional einen oder mehrere Tags wählen – es werden nur Fragen exportiert, die mindestens einen der gewählten Tags tragen. Kein Tag gewählt bedeutet: alle Tags.
 4. **Exportieren** bestätigen – die Datei wird per Share-Sheet geteilt.
 
-Die exportierte Datei enthält die Auflösungen obfuskiert. Calibrate zeigt beim Empfänger „Lösung vorhanden" und löst die Vorhersage nach der Schätzung automatisch auf.
+Die exportierte Datei enthält die Auflösungen obfuskiert. Kailibrate zeigt beim Empfänger „Lösung vorhanden" und löst die Vorhersage nach der Schätzung automatisch auf.
 
 Mehr zum Format unter [Format-Referenz](format.md).

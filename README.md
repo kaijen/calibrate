@@ -1,8 +1,8 @@
-# Calibrate
+# Kailibrate
 
 Android-App zum Kalibrieren persönlicher Wahrscheinlichkeitsschätzungen.
 
-Wer sagt „70 % Wahrscheinlichkeit", sollte damit in 70 % der Fälle recht behalten. Calibrate misst, ob das stimmt – und zeigt, wo Schätzungen systematisch zu hoch oder zu niedrig ausfallen.
+Wer sagt „70 % Wahrscheinlichkeit", sollte damit in 70 % der Fälle recht behalten. Kailibrate misst, ob das stimmt – und zeigt, wo Schätzungen systematisch zu hoch oder zu niedrig ausfallen.
 
 ---
 
@@ -145,12 +145,12 @@ Release-APKs müssen mit einem festen Keystore signiert sein, damit Android Upda
 
 ```sh
 keytool -genkey -v \
-  -keystore android/app/calibrate-release.jks \
+  -keystore android/app/kailibrate-release.jks \
   -keyalg RSA -keysize 2048 -validity 10000 \
-  -alias calibrate
+  -alias kailibrate
 ```
 
-Die Datei `android/app/calibrate-release.jks` ist in `.gitignore` eingetragen und wird nie committed.
+Die Datei `android/app/kailibrate-release.jks` ist in `.gitignore` eingetragen und wird nie committed.
 
 ### `key.properties` anlegen
 
@@ -158,8 +158,8 @@ Die Datei `android/app/calibrate-release.jks` ist in `.gitignore` eingetragen un
 # android/app/key.properties  –  nicht committen
 storePassword=<keystore-passwort>
 keyPassword=<key-passwort>
-keyAlias=calibrate
-storeFile=calibrate-release.jks
+keyAlias=kailibrate
+storeFile=kailibrate-release.jks
 ```
 
 Danach funktioniert `just release` lokal mit dem eigenen Keystore.
@@ -169,7 +169,7 @@ Danach funktioniert `just release` lokal mit dem eigenen Keystore.
 Der Keystore wird als Base64-Secret hinterlegt:
 
 ```sh
-base64 -w 0 android/app/calibrate-release.jks
+base64 -w 0 android/app/kailibrate-release.jks
 ```
 
 Vier Secrets in **Settings → Secrets and variables → Actions** anlegen:
@@ -178,7 +178,7 @@ Vier Secrets in **Settings → Secrets and variables → Actions** anlegen:
 |--------|--------|
 | `KEYSTORE_BASE64` | Base64-kodierter Keystore |
 | `STORE_PASSWORD` | Keystore-Passwort |
-| `KEY_ALIAS` | `calibrate` |
+| `KEY_ALIAS` | `kailibrate` |
 | `KEY_PASSWORD` | Key-Passwort |
 
 Der Release-Workflow dekodiert den Keystore automatisch und signiert das APK damit.

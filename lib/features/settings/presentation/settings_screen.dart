@@ -38,7 +38,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final now = DateTime.now();
       final date =
           '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-      final filename = 'calibrate_export_$date.json';
+      final filename = 'kailibrate_export_$date.json';
 
       await Share.shareXFiles(
         [
@@ -48,7 +48,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             mimeType: 'application/json',
           ),
         ],
-        subject: 'Calibrate-Export',
+        subject: 'Kailibrate-Export',
       );
     } catch (e) {
       if (mounted) {
@@ -97,7 +97,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final now = DateTime.now();
       final date =
           '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-      final filename = 'calibrate_aufgaben_$date.json';
+      final filename = 'kailibrate_aufgaben_$date.json';
 
       await Share.shareXFiles(
         [
@@ -107,7 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             mimeType: 'application/json',
           ),
         ],
-        subject: 'Calibrate-Aufgaben',
+        subject: 'Kailibrate-Aufgaben',
       );
     } catch (e) {
       if (mounted) {
@@ -154,13 +154,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     };
 
     final jsonString = const JsonEncoder.withIndent('  ').convert(debugInfo);
-    await Share.share(jsonString, subject: 'Calibrate Debug-Info');
+    await Share.share(jsonString, subject: 'Kailibrate Debug-Info');
   }
 
   Future<void> _launchDocs() async {
     final info = await PackageInfo.fromPlatform();
     final version = info.version.replaceFirst(RegExp(r'^v'), '');
-    final uri = Uri.parse('https://kaijen.github.io/calibrate/$version/');
+    final uri = Uri.parse('https://kaijen.github.io/kailibrate/$version/');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -260,7 +260,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.menu_book_outlined),
             title: const Text('Dokumentation'),
-            subtitle: const Text('kaijen.github.io/calibrate'),
+            subtitle: const Text('kaijen.github.io/kailibrate'),
             onTap: _launchDocs,
           ),
           ListTile(

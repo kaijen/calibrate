@@ -1,4 +1,4 @@
-package dev.calibrate.app
+package dev.kailibrate.app
 
 import io.flutter.embedding.android.FlutterActivity
 

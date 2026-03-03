@@ -51,14 +51,14 @@ final _router = GoRouter(
   ],
 );
 
-class CalibrateApp extends ConsumerStatefulWidget {
-  const CalibrateApp({super.key});
+class KailibrateApp extends ConsumerStatefulWidget {
+  const KailibrateApp({super.key});
 
   @override
-  ConsumerState<CalibrateApp> createState() => _CalibrateAppState();
+  ConsumerState<KailibrateApp> createState() => _KailibrateAppState();
 }
 
-class _CalibrateAppState extends ConsumerState<CalibrateApp> {
+class _KailibrateAppState extends ConsumerState<KailibrateApp> {
   @override
   void initState() {
     super.initState();
@@ -74,7 +74,7 @@ class _CalibrateAppState extends ConsumerState<CalibrateApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Calibrate',
+      title: 'Kailibrate',
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,

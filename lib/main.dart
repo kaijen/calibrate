@@ -11,7 +11,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
       tz.initializeTimeZones();
       await NotificationService.instance.initialize();
-      runApp(const ProviderScope(child: CalibrateApp()));
+      runApp(const ProviderScope(child: KailibrateApp()));
     },
     (error, stack) {
       debugPrint('Unhandled error: $error\n$stack');

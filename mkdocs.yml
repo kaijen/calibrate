@@ -1,8 +1,8 @@
-site_name: Calibrate
+site_name: Kailibrate
 site_description: Kalibriere deine Wahrscheinlichkeitsschätzungen
-site_url: https://kaijen.github.io/calibrate/
-repo_url: https://github.com/kaijen/calibrate
-repo_name: kaijen/calibrate
+site_url: https://kaijen.github.io/kailibrate/
+repo_url: https://github.com/kaijen/kailibrate
+repo_name: kaijen/kailibrate
 
 theme:
   name: material

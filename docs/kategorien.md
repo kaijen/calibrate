@@ -1,6 +1,6 @@
 # Kategorien
 
-Calibrate unterscheidet zwei Kategorien, die die Natur der Unsicherheit beschreiben.
+Kailibrate unterscheidet zwei Kategorien, die die Natur der Unsicherheit beschreiben.
 
 ## Epistemisch (`epistemic`)
 

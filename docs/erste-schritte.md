@@ -2,7 +2,7 @@
 
 ## APK installieren
 
-Das aktuelle Release ist auf [GitHub Releases](https://github.com/kaijen/calibrate/releases) verfügbar. Die APK-Datei herunterladen und auf dem Android-Gerät öffnen. Bei der ersten Installation muss „Installation aus unbekannten Quellen" erlaubt sein.
+Das aktuelle Release ist auf [GitHub Releases](https://github.com/kaijen/kailibrate/releases) verfügbar. Die APK-Datei herunterladen und auf dem Android-Gerät öffnen. Bei der ersten Installation muss „Installation aus unbekannten Quellen" erlaubt sein.
 
 ## Erste Vorhersage erfassen
 

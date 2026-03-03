@@ -14,7 +14,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calibrate'),
+        title: const Text('Kailibrate'),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
@@ -80,7 +80,7 @@ class HomeScreen extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
             Text(
-              'Willkommen bei Calibrate',
+              'Willkommen bei Kailibrate',
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),

@@ -1,4 +1,4 @@
-name: calibrate
+name: kailibrate
 description: Kalibriere deine Wahrscheinlichkeitsschätzungen.
 publish_to: 'none'
 version: 0.1.0+1

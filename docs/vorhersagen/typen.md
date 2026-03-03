@@ -1,6 +1,6 @@
 # Vorhersage-Typen
 
-Calibrate unterstützt drei Typen. Der Typ bestimmt, wie geschätzt und wie aufgelöst wird.
+Kailibrate unterstützt drei Typen. Der Typ bestimmt, wie geschätzt und wie aufgelöst wird.
 
 ## Wahrscheinlichkeit (`probability`)
 

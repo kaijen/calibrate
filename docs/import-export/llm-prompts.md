@@ -1,13 +1,13 @@
 # Fragenkataloge mit einem LLM erstellen
 
-Ein LLM wie Claude oder GPT-4 kann in Sekunden Dutzende Trivia-Fragen mit versteckten Antworten erzeugen. Der Trick: Die Antworten stecken als `resolution`-Feld in der Importdatei, aber ohne vorausgefüllte Schätzung. Calibrate zeigt dann „Lösung vorhanden" – und wendet die Auflösung erst an, nachdem der Nutzer seine Schätzung abgegeben hat.
+Ein LLM wie Claude oder GPT-4 kann in Sekunden Dutzende Trivia-Fragen mit versteckten Antworten erzeugen. Der Trick: Die Antworten stecken als `resolution`-Feld in der Importdatei, aber ohne vorausgefüllte Schätzung. Kailibrate zeigt dann „Lösung vorhanden" – und wendet die Auflösung erst an, nachdem der Nutzer seine Schätzung abgegeben hat.
 
 **Ablauf:**
 
 1. Prompt an LLM schicken → JSON/YAML kopieren
-2. In Calibrate importieren (Zwischenablage oder Datei)
+2. In Kailibrate importieren (Zwischenablage oder Datei)
 3. Jede Frage schätzen, ohne die Antwort zu kennen
-4. Nach der Schätzung löst Calibrate automatisch auf und wertet aus
+4. Nach der Schätzung löst Kailibrate automatisch auf und wertet aus
 
 ---
 
@@ -16,7 +16,7 @@ Ein LLM wie Claude oder GPT-4 kann in Sekunden Dutzende Trivia-Fragen mit verste
 Geeignet für Faktfragen, bei denen eine klare richtige Antwort existiert.
 
 ```
-Erstelle einen Fragenkatalog für die App Calibrate im JSON-Format.
+Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: [THEMA, z.B. "Europäische Geografie" oder "Wissenschaftsgeschichte"]
 Anzahl: [ANZAHL, z.B. 15]
 
@@ -55,7 +55,7 @@ Format:
 Geeignet für numerische Schätzfragen: Jahreszahlen, Entfernungen, Bevölkerungszahlen.
 
 ```
-Erstelle einen Fragenkatalog für die App Calibrate im JSON-Format.
+Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: [THEMA, z.B. "Historische Jahreszahlen" oder "Weltrekorde"]
 Anzahl: [ANZAHL, z.B. 10]
 
@@ -100,7 +100,7 @@ Format:
 Für abwechslungsreichere Übungen mit verschiedenen Fragetypen.
 
 ```
-Erstelle einen gemischten Fragenkatalog für die App Calibrate im JSON-Format.
+Erstelle einen gemischten Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: [THEMA]
 Anzahl: [ANZAHL] Fragen, davon etwa die Hälfte Ja/Nein, die Hälfte Intervall.
 
@@ -141,4 +141,4 @@ Ausgabe ausschließlich als valides JSON.
 
 **Themenbreite:** Enge Themen (nur deutsche Hauptstädte) erzeugen homogene Schwierigkeit. Breite Themen (Weltgeografie, Naturwissenschaften, Geschichte) fordern das Kalibrierungsgefühl stärker.
 
-**Datei teilen ohne Spoiler:** Wer einen Katalog mit Auflösungen an andere weitergeben will, exportiert erst in Calibrate und teilt den Export – die App obfuskiert die Auflösungen automatisch mit ROT13 + Base64.
+**Datei teilen ohne Spoiler:** Wer einen Katalog mit Auflösungen an andere weitergeben will, exportiert erst in Kailibrate und teilt den Export – die App obfuskiert die Auflösungen automatisch mit ROT13 + Base64.

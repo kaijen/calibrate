@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calibrate/core/utils/import_parser.dart';
+import 'package:kailibrate/core/utils/import_parser.dart';
 
 // Hilfsfunktionen: spiegeln die Obfuskierung in app_database.dart
 String _rot13(String input) {

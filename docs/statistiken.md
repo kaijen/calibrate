@@ -1,6 +1,6 @@
 # Statistiken
 
-Calibrate berechnet drei Kennzahlen, um die Qualität von Schätzungen zu messen.
+Kailibrate berechnet drei Kennzahlen, um die Qualität von Schätzungen zu messen.
 
 ## Brier Score
 
