@@ -28,11 +28,6 @@ class HomeScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Fehler: $e')),
         data: (predictions) => _buildBody(context, predictions),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Neue Vorhersage'),
-      ),
     );
   }
 
