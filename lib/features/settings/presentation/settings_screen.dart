@@ -7,6 +7,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers.dart';
+import '../../../core/services/api_key_service.dart';
+import '../../../core/services/prompt_template_service.dart';
+import '../../ai_generator/presentation/ai_generator_screen.dart'
+    show TemplateEditorDialog;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -20,12 +24,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _sharingExportLoading = false;
   PackageInfo? _packageInfo;
 
+  // AI generator settings
+  final _apiKeyController = TextEditingController();
+  bool _apiKeyObscured = true;
+  bool _apiKeyLoaded = false;
+  String _selectedModel = 'google/gemma-3-12b-it:free';
+  bool _customModel = false;
+  final _customModelController = TextEditingController();
+
+  static const _knownModels = [
+    ('google/gemma-3-12b-it:free', 'Gemma 3 12B (kostenlos)'),
+    ('meta-llama/llama-3.1-8b-instruct:free', 'Llama 3.1 8B (kostenlos)'),
+    ('google/gemini-flash-1.5', 'Gemini Flash 1.5'),
+    ('anthropic/claude-haiku-3', 'Claude Haiku 3'),
+    ('mistralai/mistral-small-3.1-24b-instruct', 'Mistral Small 3.1'),
+  ];
+
   @override
   void initState() {
     super.initState();
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _packageInfo = info);
     });
+    _loadAiSettings();
+  }
+
+  @override
+  void dispose() {
+    _apiKeyController.dispose();
+    _customModelController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadAiSettings() async {
+    final key = await ApiKeyService.getKey();
+    final model = await ApiKeyService.getModel();
+    if (!mounted) return;
+
+    final isKnown = model == null ||
+        _knownModels.any((m) => m.$1 == model);
+
+    setState(() {
+      _apiKeyController.text = key ?? '';
+      _apiKeyLoaded = true;
+      if (model != null) {
+        _selectedModel = model;
+        _customModel = !isKnown;
+        if (!isKnown) _customModelController.text = model;
+      }
+    });
+  }
+
+  Future<void> _saveApiKey() async {
+    final key = _apiKeyController.text.trim();
+    if (key.isEmpty) {
+      await ApiKeyService.deleteKey();
+    } else {
+      await ApiKeyService.saveKey(key);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API-Key gespeichert.')),
+      );
+    }
+  }
+
+  Future<void> _saveModel(String model) async {
+    await ApiKeyService.saveModel(model);
+    setState(() => _selectedModel = model);
   }
 
   Future<void> _export() async {
@@ -170,6 +236,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _showTemplateManager(BuildContext context) async {
+    final templates = await PromptTemplateService.loadAll();
+    if (!context.mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _TemplateManagerDialog(templates: templates),
+    );
+  }
+
   Future<void> _confirmReset() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -253,6 +329,114 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Text(
+              'KI-Generator',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (_apiKeyLoaded) ...[
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _apiKeyController,
+                      obscureText: _apiKeyObscured,
+                      decoration: InputDecoration(
+                        labelText: 'OpenRouter API-Key',
+                        hintText: 'sk-or-…',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(_apiKeyObscured
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined),
+                          onPressed: () => setState(
+                              () => _apiKeyObscured = !_apiKeyObscured),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _saveApiKey,
+                    child: const Text('Speichern'),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: _customModel ? '__custom__' : _selectedModel,
+                    decoration: const InputDecoration(
+                      labelText: 'Modell',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      ..._knownModels.map(
+                        (m) => DropdownMenuItem(
+                            value: m.$1, child: Text(m.$2)),
+                      ),
+                      const DropdownMenuItem(
+                          value: '__custom__',
+                          child: Text('Eigenes Modell …')),
+                    ],
+                    onChanged: (v) {
+                      if (v == '__custom__') {
+                        setState(() => _customModel = true);
+                      } else if (v != null) {
+                        setState(() => _customModel = false);
+                        _saveModel(v);
+                      }
+                    },
+                  ),
+                  if (_customModel) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _customModelController,
+                            decoration: const InputDecoration(
+                              labelText: 'Modell-ID',
+                              hintText: 'provider/model-name',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () => _saveModel(
+                              _customModelController.text.trim()),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ] else
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: LinearProgressIndicator(),
+            ),
+          ListTile(
+            leading: const Icon(Icons.list_alt_outlined),
+            title: const Text('Vorlagen verwalten'),
+            subtitle: const Text('Prompt-Vorlagen ansehen und bearbeiten'),
+            onTap: () => _showTemplateManager(context),
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
               'Hilfe',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -297,6 +481,113 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Template manager dialog (used from settings)
+// ---------------------------------------------------------------------------
+
+class _TemplateManagerDialog extends StatefulWidget {
+  final List<PromptTemplate> templates;
+  const _TemplateManagerDialog({required this.templates});
+
+  @override
+  State<_TemplateManagerDialog> createState() =>
+      _TemplateManagerDialogState();
+}
+
+class _TemplateManagerDialogState extends State<_TemplateManagerDialog> {
+  late List<PromptTemplate> _templates;
+
+  @override
+  void initState() {
+    super.initState();
+    _templates = List.from(widget.templates);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Vorlagen verwalten'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _templates.length + 1,
+          itemBuilder: (ctx, i) {
+            if (i == _templates.length) {
+              return ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text('Neue Vorlage erstellen'),
+                onTap: () async {
+                  final created = await showDialog<PromptTemplate>(
+                    context: context,
+                    builder: (_) => TemplateEditorDialog(
+                      template: PromptTemplate(
+                        id: PromptTemplateService.generateId(),
+                        name: '',
+                        body: '',
+                      ),
+                    ),
+                  );
+                  if (created != null && created.name.isNotEmpty) {
+                    await PromptTemplateService.save(created);
+                    final updated = await PromptTemplateService.loadAll();
+                    setState(() => _templates = updated);
+                  }
+                },
+              );
+            }
+            final t = _templates[i];
+            return ListTile(
+              title: Text(t.name),
+              subtitle: t.isDefault ? const Text('Standardvorlage') : null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () async {
+                      final edited = await showDialog<PromptTemplate>(
+                        context: context,
+                        builder: (_) =>
+                            TemplateEditorDialog(template: t),
+                      );
+                      if (edited != null && !t.isDefault) {
+                        await PromptTemplateService.save(edited);
+                        final updated =
+                            await PromptTemplateService.loadAll();
+                        setState(() => _templates = updated);
+                      }
+                    },
+                  ),
+                  if (!t.isDefault)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      color: Theme.of(context).colorScheme.error,
+                      onPressed: () async {
+                        await PromptTemplateService.delete(t.id);
+                        final updated =
+                            await PromptTemplateService.loadAll();
+                        setState(() => _templates = updated);
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Schließen'),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 class _ExportChoice {
   final String? category; // null = alle

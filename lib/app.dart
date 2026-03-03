@@ -12,6 +12,7 @@ import 'features/import_data/presentation/import_screen.dart';
 import 'features/new_prediction/presentation/new_prediction_screen.dart';
 import 'features/predictions/presentation/prediction_detail_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/ai_generator/presentation/ai_generator_screen.dart';
 import 'shared/theme/app_theme.dart';
 
 final _router = GoRouter(
@@ -48,6 +49,7 @@ final _router = GoRouter(
     GoRoute(path: '/import', builder: (_, __) => const ImportScreen()),
     GoRoute(path: '/new', builder: (_, __) => const NewPredictionScreen()),
     GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+    GoRoute(path: '/ai-generator', builder: (_, __) => const AiGeneratorScreen()),
   ],
 );
 

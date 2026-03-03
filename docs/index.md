@@ -8,6 +8,7 @@ Wer sagt „70 % Wahrscheinlichkeit", sollte damit in 70 % der Fälle recht beha
 
 ## Was die App kann
 
+- **Fragenkataloge per KI generieren** – Thema und Anzahl eingeben, OpenRouter-KI erzeugt epistemische Quizfragen inkl. Auflösungen; fertige Kataloge lassen sich direkt importieren oder als obfuskierte JSON-Datei teilen
 - **Vorhersagen erfassen** – manuell oder per JSON/YAML-Import (Datei oder Zwischenablage)
 - **Wahrscheinlichkeit schätzen** – direkt beim Erfassen oder nachträglich; drei Eingabeformen: Slider, Ja/Nein mit Konfidenz, Intervall
 - **Ergebnis auflösen** – nach Eintreten oder Nicht-Eintreten des Ereignisses

@@ -306,6 +306,13 @@ class ImportParser {
     );
   }
 
+  /// Encodes a resolution map as ROT13-then-Base64 string (v2 share format).
+  static String obfuscateResolution(Map<String, dynamic> resolution) {
+    final plain = jsonEncode(resolution);
+    final rot13 = _rot13(plain);
+    return base64Encode(utf8.encode(rot13));
+  }
+
   /// Base64 dekodieren, dann ROT13 dekodieren.
   static Map<String, dynamic> _deobfuscateResolution(String obfuscated) {
     final bytes = base64Decode(obfuscated);
