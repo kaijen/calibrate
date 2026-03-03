@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.1] - 2026-03-03
+
+### Changed
+- Project renamed from Calibrate to Kailibrate: package name,
+  applicationId (`dev.kailibrate.app`), database filename (`kailibrate.db`),
+  notification channel ID, and app title
+
+### Fixed
+- Release workflow: APK filename in `files:` parameter corrected
+  (`calibrate-` → `kailibrate-`); `fail_on_unmatched_files: true` added
+
 ## [0.18.0] - 2026-03-03
 
 ### Changed
@@ -321,7 +332,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.18.1...HEAD
+[0.18.1]: https://github.com/kaijen/kailibrate/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/kaijen/kailibrate/compare/v0.17.4...v0.18.0
 [0.17.4]: https://github.com/kaijen/kailibrate/compare/v0.17.3...v0.17.4
 [0.17.3]: https://github.com/kaijen/kailibrate/compare/v0.17.2...v0.17.3
