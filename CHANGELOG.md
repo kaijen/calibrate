@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0-beta.4] - 2026-03-04
+
+### Fixed
+- Yes/no questions now show green for a correct "Nein" prediction;
+  color and icon are based on binaryChoice == outcome instead of
+  outcome alone (feedback banner, prediction card, detail view) (#41)
+
 ## [0.21.0-beta.3] - 2026-03-04
 
 ### Added
@@ -401,7 +408,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.4...HEAD
+[0.21.0-beta.4]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...v0.21.0-beta.4
 [0.21.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...v0.21.0-beta.3
 [0.21.0-beta.2]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.1...v0.21.0-beta.2
 [0.21.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.20.0-beta.1...v0.21.0-beta.1
