@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0-beta.3] - 2026-03-04
+
+### Added
+- Tags input in AI generator: restricts which labels the LLM assigns
+  to generated questions, for consistent in-app filtering (#36)
+- Generation cost and token count shown in the preview after each
+  run (#39)
+- Info icon in model settings links to openrouter.ai/models (#37)
+- Clipboard copy button for the model list (#37)
+
+### Changed
+- Model list editor replaced with a multiline text field (one model
+  per line); easier to manage and paste from (#37)
+- Selected model is persisted and restored on next session (#38)
+- API key is now write-only: after saving, only bullet placeholders
+  are shown with an "Ändern" button (#40)
+
+### Fixed
+- Yes/no question prompts (default and mixed templates) now correctly
+  set predictionType: "binary" so the binary estimate UI is shown
+  after import (#35)
+
 ## [0.21.0-beta.2] - 2026-03-03
 
 ### Added
@@ -379,7 +401,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...HEAD
+[0.21.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...v0.21.0-beta.3
 [0.21.0-beta.2]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.1...v0.21.0-beta.2
 [0.21.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.20.0-beta.1...v0.21.0-beta.1
 [0.20.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.19.0...v0.20.0-beta.1
