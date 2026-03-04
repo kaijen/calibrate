@@ -24,8 +24,8 @@ class CalibrationFeedbackSheet extends StatelessWidget {
 
   static const _typeLabels = {
     'binary': 'Ja/Nein',
+    'factual': 'Wahr/Falsch',
     'interval': 'Intervall',
-    'probability': 'Wahrscheinlichkeit',
   };
 
   String _estimateLabel() {
@@ -34,6 +34,9 @@ class CalibrationFeedbackSheet extends StatelessWidget {
       'binary' => e.binaryChoice == true
           ? 'JA – ${(e.confidenceLevel * 100).round()} %'
           : 'NEIN – ${(e.confidenceLevel * 100).round()} %',
+      'factual' => e.binaryChoice == true
+          ? 'WAHR – ${(e.confidenceLevel * 100).round()} %'
+          : 'FALSCH – ${(e.confidenceLevel * 100).round()} %',
       'interval' => () {
           final unit = e.unit ?? '';
           final u = unit.isNotEmpty ? ' $unit' : '';
@@ -45,6 +48,16 @@ class CalibrationFeedbackSheet extends StatelessWidget {
     };
   }
 
+  // For binary questions, correctness depends on whether the predicted
+  // direction matches the outcome, not just on outcome being true.
+  bool _isCorrect() {
+    if ((predictionType == 'binary' || predictionType == 'factual') &&
+        estimate != null) {
+      return estimate!.binaryChoice == outcome;
+    }
+    return outcome;
+  }
+
   double _brierContribution() {
     final p = estimate!.probability;
     final o = outcome ? 1.0 : 0.0;
@@ -53,7 +66,8 @@ class CalibrationFeedbackSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outcomeColor = outcome ? Colors.green : Colors.red;
+    final isCorrect = _isCorrect();
+    final outcomeColor = isCorrect ? Colors.green : Colors.red;
     final typeLabel = _typeLabels[predictionType] ?? predictionType;
     final showTypeSection = typeStats.totalCount < overallStats.totalCount;
 
@@ -75,17 +89,42 @@ class CalibrationFeedbackSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    outcome ? Icons.check_circle : Icons.cancel,
+                    isCorrect ? Icons.check_circle : Icons.cancel,
                     color: outcomeColor,
                     size: 28,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    outcome ? 'Eingetreten' : 'Nicht eingetreten',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: outcomeColor,
-                          fontWeight: FontWeight.bold,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        (predictionType == 'binary' ||
+                                predictionType == 'factual')
+                            ? (isCorrect ? 'Richtig' : 'Falsch')
+                            : (outcome ? 'Eingetreten' : 'Nicht eingetreten'),
+                        style:
+                            Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: outcomeColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      if (predictionType == 'binary')
+                        Text(
+                          'Antwort: ${outcome ? 'Ja' : 'Nein'}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: outcomeColor,
+                                  ),
                         ),
+                      if (predictionType == 'factual')
+                        Text(
+                          'Fakt: ${outcome ? 'Wahr' : 'Falsch'}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: outcomeColor,
+                                  ),
+                        ),
+                    ],
                   ),
                 ],
               ),

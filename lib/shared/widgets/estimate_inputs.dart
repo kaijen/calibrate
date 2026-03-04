@@ -8,17 +8,12 @@ const _sentinel = Object();
 // --- State ---
 
 class EstimateFormState {
-  // probability-Typ
-  final double probability;
-  // binary-Typ
   final bool? binaryChoice;
   final double confidenceLevel;
-  // interval-Typ
   final String lowerBoundText;
   final String upperBoundText;
 
   const EstimateFormState({
-    this.probability = 0.5,
     this.binaryChoice,
     this.confidenceLevel = 0.9,
     this.lowerBoundText = '',
@@ -26,14 +21,12 @@ class EstimateFormState {
   });
 
   EstimateFormState copyWith({
-    double? probability,
     Object? binaryChoice = _sentinel,
     double? confidenceLevel,
     String? lowerBoundText,
     String? upperBoundText,
   }) {
     return EstimateFormState(
-      probability: probability ?? this.probability,
       binaryChoice:
           binaryChoice == _sentinel ? this.binaryChoice : binaryChoice as bool?,
       confidenceLevel: confidenceLevel ?? this.confidenceLevel,
@@ -48,7 +41,6 @@ class EstimateFormState {
 class EstimateFormNotifier extends StateNotifier<EstimateFormState> {
   EstimateFormNotifier() : super(const EstimateFormState());
 
-  void setProbability(double v) => state = state.copyWith(probability: v);
   void setBinaryChoice(bool? v) =>
       state = state.copyWith(binaryChoice: v ?? _sentinel);
   void setConfidence(double v) => state = state.copyWith(confidenceLevel: v);
@@ -62,15 +54,13 @@ class EstimateFormNotifier extends StateNotifier<EstimateFormState> {
 /// Voraussetzung: [state] ist für [predictionType] gültig.
 double computeEstimateProbability(
     EstimateFormState state, String predictionType) {
-  if (predictionType == 'binary') {
+  if (predictionType == 'binary' || predictionType == 'factual') {
     return state.binaryChoice!
         ? state.confidenceLevel
         : 1.0 - state.confidenceLevel;
   }
-  if (predictionType == 'interval') {
-    return state.confidenceLevel;
-  }
-  return state.probability;
+  // interval and any unknown type
+  return state.confidenceLevel;
 }
 
 // --- Binary Input ---
@@ -122,7 +112,65 @@ class BinaryEstimateInput extends StatelessWidget {
         ConfidenceSlider(
           value: state.confidenceLevel,
           onChanged: notifier.setConfidence,
-          label: 'Konfidenz',
+          label: 'Wie sicher bist du? (50 % = Raten)',
+          min: 0.5,
+        ),
+      ],
+    );
+  }
+}
+
+// --- Factual Input (Wahr/Falsch – epistemic) ---
+
+class FactualEstimateInput extends StatelessWidget {
+  final EstimateFormState state;
+  final EstimateFormNotifier notifier;
+
+  const FactualEstimateInput({
+    super.key,
+    required this.state,
+    required this.notifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Ist die Aussage wahr oder falsch?',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceButton(
+                label: 'Wahr',
+                icon: Icons.check_circle_outline,
+                selected: state.binaryChoice == true,
+                color: Colors.green,
+                onTap: () => notifier.setBinaryChoice(true),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ChoiceButton(
+                label: 'Falsch',
+                icon: Icons.cancel_outlined,
+                selected: state.binaryChoice == false,
+                color: Colors.red,
+                onTap: () => notifier.setBinaryChoice(false),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        ConfidenceSlider(
+          value: state.confidenceLevel,
+          onChanged: notifier.setConfidence,
+          label: 'Wie sicher bist du? (50 % = Raten)',
+          min: 0.5,
         ),
       ],
     );
@@ -239,16 +287,19 @@ class ConfidenceSlider extends StatelessWidget {
   final double value;
   final ValueChanged<double> onChanged;
   final String label;
+  final double min;
 
   const ConfidenceSlider({
     super.key,
     required this.value,
     required this.onChanged,
     required this.label,
+    this.min = 0.1,
   });
 
   @override
   Widget build(BuildContext context) {
+    final divisions = ((0.99 - min) * 100).round();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,10 +320,10 @@ class ConfidenceSlider extends StatelessWidget {
           ],
         ),
         Slider(
-          value: value,
-          min: 0.1,
+          value: value.clamp(min, 0.99),
+          min: min,
           max: 0.99,
-          divisions: 89,
+          divisions: divisions,
           label: '${(value * 100).round()} %',
           onChanged: onChanged,
         ),

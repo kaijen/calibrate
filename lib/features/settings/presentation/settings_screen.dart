@@ -2,11 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers.dart';
+import '../../../core/services/api_key_service.dart';
+import '../../../core/services/prompt_template_service.dart';
+import '../../ai_generator/presentation/ai_generator_screen.dart'
+    show TemplateEditorDialog;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -20,12 +25,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _sharingExportLoading = false;
   PackageInfo? _packageInfo;
 
+  // AI generator settings
+  final _apiKeyController = TextEditingController();
+  final _modelsController = TextEditingController();
+  bool _hasApiKey = false;
+  bool _apiKeyEditing = false;
+  bool _apiKeyLoaded = false;
+
   @override
   void initState() {
     super.initState();
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _packageInfo = info);
     });
+    _loadAiSettings();
+  }
+
+  @override
+  void dispose() {
+    _apiKeyController.dispose();
+    _modelsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadAiSettings() async {
+    final hasKey = await ApiKeyService.hasKey();
+    final models = await ApiKeyService.getModelList();
+    if (!mounted) return;
+
+    setState(() {
+      _hasApiKey = hasKey;
+      _modelsController.text = models.join('\n');
+      _apiKeyLoaded = true;
+    });
+  }
+
+  Future<void> _saveApiKey() async {
+    final key = _apiKeyController.text.trim();
+    if (key.isEmpty) {
+      await ApiKeyService.deleteKey();
+      if (mounted) setState(() { _hasApiKey = false; _apiKeyEditing = false; });
+    } else {
+      await ApiKeyService.saveKey(key);
+      _apiKeyController.clear();
+      if (mounted) setState(() { _hasApiKey = true; _apiKeyEditing = false; });
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API-Key gespeichert.')),
+      );
+    }
+  }
+
+  Future<void> _saveModels() async {
+    final lines = _modelsController.text
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+    await ApiKeyService.saveModelList(lines);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Modellliste gespeichert.')),
+      );
+    }
   }
 
   Future<void> _export() async {
@@ -170,6 +233,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _showTemplateManager(BuildContext context) async {
+    final templates = await PromptTemplateService.loadAll();
+    if (!context.mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _TemplateManagerDialog(templates: templates),
+    );
+  }
+
   Future<void> _confirmReset() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -253,6 +326,134 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Text(
+              'KI-Generator',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (_apiKeyLoaded) ...[
+            if (_hasApiKey && !_apiKeyEditing)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.key, size: 20),
+                    const SizedBox(width: 8),
+                    const Expanded(child: Text('API-Key gespeichert  ••••••••')),
+                    TextButton(
+                      onPressed: () => setState(() => _apiKeyEditing = true),
+                      child: const Text('Ändern'),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _apiKeyController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'OpenRouter API-Key',
+                          hintText: 'sk-or-…',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (_apiKeyEditing)
+                      TextButton(
+                        onPressed: () => setState(() {
+                          _apiKeyEditing = false;
+                          _apiKeyController.clear();
+                        }),
+                        child: const Text('Abbrechen'),
+                      ),
+                    FilledButton(
+                      onPressed: _saveApiKey,
+                      child: const Text('Speichern'),
+                    ),
+                  ],
+                ),
+              ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text('Modelle',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.copy_outlined, size: 18),
+                        tooltip: 'Liste kopieren',
+                        onPressed: () {
+                          Clipboard.setData(
+                              ClipboardData(text: _modelsController.text));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('In Zwischenablage kopiert.')),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.info_outline, size: 18),
+                        tooltip: 'Verfügbare Modelle auf openrouter.ai',
+                        onPressed: () => launchUrl(
+                          Uri.parse('https://openrouter.ai/models'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Text(
+                    'Ein Modell pro Zeile. Erstes wird als Standard verwendet.',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _modelsController,
+                    maxLines: 6,
+                    decoration: const InputDecoration(
+                      hintText:
+                          'google/gemini-2.5-flash-preview\ngoogle/gemini-2.0-flash-lite-001\n…',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton(
+                      onPressed: _saveModels,
+                      child: const Text('Speichern'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: LinearProgressIndicator(),
+            ),
+          ListTile(
+            leading: const Icon(Icons.list_alt_outlined),
+            title: const Text('Vorlagen verwalten'),
+            subtitle: const Text('Prompt-Vorlagen ansehen und bearbeiten'),
+            onTap: () => _showTemplateManager(context),
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
               'Hilfe',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -297,6 +498,112 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Template manager dialog (used from settings)
+// ---------------------------------------------------------------------------
+
+class _TemplateManagerDialog extends StatefulWidget {
+  final List<PromptTemplate> templates;
+  const _TemplateManagerDialog({required this.templates});
+
+  @override
+  State<_TemplateManagerDialog> createState() =>
+      _TemplateManagerDialogState();
+}
+
+class _TemplateManagerDialogState extends State<_TemplateManagerDialog> {
+  late List<PromptTemplate> _templates;
+
+  @override
+  void initState() {
+    super.initState();
+    _templates = List.from(widget.templates);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Vorlagen verwalten'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _templates.length + 1,
+          itemBuilder: (ctx, i) {
+            if (i == _templates.length) {
+              return ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text('Neue Vorlage erstellen'),
+                onTap: () async {
+                  final created = await showDialog<PromptTemplate>(
+                    context: context,
+                    builder: (_) => TemplateEditorDialog(
+                      template: PromptTemplate(
+                        id: PromptTemplateService.generateId(),
+                        name: '',
+                        body: '',
+                      ),
+                    ),
+                  );
+                  if (created != null && created.name.isNotEmpty) {
+                    await PromptTemplateService.save(created);
+                    final updated = await PromptTemplateService.loadAll();
+                    setState(() => _templates = updated);
+                  }
+                },
+              );
+            }
+            final t = _templates[i];
+            return ListTile(
+              title: Text(t.name),
+              subtitle: t.isDefault ? const Text('Standardvorlage') : null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () async {
+                      final edited = await showDialog<PromptTemplate>(
+                        context: context,
+                        builder: (_) =>
+                            TemplateEditorDialog(template: t),
+                      );
+                      if (edited != null && !t.isDefault) {
+                        await PromptTemplateService.save(edited);
+                        final updated =
+                            await PromptTemplateService.loadAll();
+                        setState(() => _templates = updated);
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    color: Theme.of(context).colorScheme.error,
+                    onPressed: () async {
+                      await PromptTemplateService.delete(t.id);
+                      final updated =
+                          await PromptTemplateService.loadAll();
+                      setState(() => _templates = updated);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Schließen'),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 class _ExportChoice {
   final String? category; // null = alle
@@ -405,3 +712,4 @@ class _SharingFilterDialogState extends State<_SharingFilterDialog> {
     );
   }
 }
+

@@ -7,6 +7,160 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.28.0-beta.1] - 2026-03-04
+
+### Fixed
+- Calibration curve and scores now use directional confidence for
+  binary/factual predictions; a "99 % FALSCH" estimate that was
+  correct now appears in the 99 % bin, not the 1 % bin (#52)
+
+## [0.27.0-beta.1] - 2026-03-04
+
+### Fixed
+- Generation cost and token count now shown prominently above the
+  success icon after AI import (#50)
+- Resolution outcome hidden in detail view until user has estimated;
+  shows locked indicator instead (#51)
+
+## [0.26.0-beta.1] - 2026-03-04
+
+### Changed
+- Restructured docs with why/what/how narrative flow
+- New Konzepte page covering calibration, categories, types, and states
+- New KI-Generator page with step-by-step usage guide
+- Removed deprecated probability type from examples
+- Fixed stale navigation description in prediction workflow
+
+## [0.25.0-beta.1] - 2026-03-04
+
+### Added
+- Warning in AI generator preview when questions have past deadlines
+- Checkbox to exclude past-deadline questions before import
+- `{date}` placeholder in aleatory prompt templates so the model
+  generates future-only deadlines
+
+## [0.24.0-beta.1] - 2026-03-04
+
+### Added
+- Deadline shown on prediction cards with color-coded urgency:
+  red for overdue, orange for due within 7 days (#48)
+
+## [0.23.0-beta.1] - 2026-03-04
+
+### Added
+- Deadline can be set, changed, or cleared from the detail view
+  for open and pending predictions (#47)
+- Overdue open/pending predictions flagged with "Überfällig" badge
+  in the overview (#47)
+
+### Changed
+- Tapping any prediction card now opens the detail view; primary
+  action (Schätzen/Auflösen) surfaced via FAB for non-resolved
+  predictions (#47)
+
+## [0.22.0-beta.1] - 2026-03-04
+
+### Added
+- Aleatory AI templates for binary (Ja/Nein) and interval predictions
+  on future events without known answers (#46)
+
+### Changed
+- `probability` prediction type removed; replaced by `binary` (aleatory)
+  and `factual` (epistemic) throughout the app (#45)
+- Import parser remaps legacy `probability` entries to `binary`/`factual`
+  based on category; schema migrated to v5 (#45)
+- Stats and feedback screens updated to reflect new type set (#44, #45)
+- Mixed AI template removed in favour of the two focused aleatory
+  templates (#46)
+- LLM prompt docs and type reference updated (#45, #46)
+
+## [0.21.0-beta.5] - 2026-03-04
+
+### Added
+- New 'factual' predictionType for epistemic Wahr/Falsch questions,
+  distinct from 'binary' (Ja/Nein) used for aleatory events (#43)
+- Wahr/Falsch buttons in estimate, resolve, feedback, card, and detail
+  views for factual questions (#43)
+
+### Changed
+- DB migration v4 converts existing epistemic binary entries to factual (#43)
+- New-prediction screen shows Wahr/Falsch segment only for epistemic
+  category; Ja/Nein stays for aleatory (#43)
+- Default AI prompt template updated to use predictionType "factual" (#43)
+
+### Fixed
+- Binary feedback banner now shows actual Ja/Nein answer below
+  Richtig/Falsch verdict (#42)
+
+## [0.21.0-beta.4] - 2026-03-04
+
+### Fixed
+- Yes/no questions now show green for a correct "Nein" prediction;
+  color and icon are based on binaryChoice == outcome instead of
+  outcome alone (feedback banner, prediction card, detail view) (#41)
+
+## [0.21.0-beta.3] - 2026-03-04
+
+### Added
+- Tags input in AI generator: restricts which labels the LLM assigns
+  to generated questions, for consistent in-app filtering (#36)
+- Generation cost and token count shown in the preview after each
+  run (#39)
+- Info icon in model settings links to openrouter.ai/models (#37)
+- Clipboard copy button for the model list (#37)
+
+### Changed
+- Model list editor replaced with a multiline text field (one model
+  per line); easier to manage and paste from (#37)
+- Selected model is persisted and restored on next session (#38)
+- API key is now write-only: after saving, only bullet placeholders
+  are shown with an "Ändern" button (#40)
+
+### Fixed
+- Yes/no question prompts (default and mixed templates) now correctly
+  set predictionType: "binary" so the binary estimate UI is shown
+  after import (#35)
+
+## [0.21.0-beta.2] - 2026-03-03
+
+### Added
+- Default prompt templates can now be deleted; they are hidden via
+  a per-device suppression list and remain recoverable from source
+  code (#34)
+
+## [0.21.0-beta.1] - 2026-03-03
+
+### Added
+- Configurable model list in Settings: add/remove OpenRouter models,
+  first entry used as default (#34)
+- Model dropdown in AI generator form, pre-filled with the first
+  configured model; selection persists per session (#34)
+- Binary confidence slider now spans 50–99 % (50 % = maximum
+  uncertainty / guessing); below 50 % the answer direction should
+  be flipped instead (#33)
+
+### Fixed
+- "Einstellungen" button in the missing-API-key card now navigates
+  correctly with go_router (`context.push` instead of
+  `Navigator.pushNamed`) (#31)
+- Import preview in AI generator no longer reveals correct/incorrect
+  icons for questions with embedded resolutions (#32)
+
+## [0.20.0-beta.1] - 2026-03-03
+
+### Added
+- Generate epistemic quiz questions via OpenRouter AI; supports
+  custom prompt templates (editable and deletable) and a
+  configurable question count (5 / 10 / 15 / 20)
+- API key for OpenRouter stored securely via flutter_secure_storage;
+  configurable in Settings
+- Preview screen before import: category, source, question count,
+  first 5 questions with resolution indicators
+- Share generated catalog as obfuscated v2 JSON directly from the
+  preview screen, without importing first
+- `ImportParser.obfuscateResolution()` as public static method for
+  encoding resolutions outside the database layer
+
 ## [0.18.2] - 2026-03-03
 
 ### Fixed
@@ -339,7 +493,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.18.2...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.28.0-beta.1...HEAD
+[0.28.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.27.0-beta.1...v0.28.0-beta.1
+[0.27.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.26.0-beta.1...v0.27.0-beta.1
+[0.26.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.25.0-beta.1...v0.26.0-beta.1
+[0.25.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.24.0-beta.1...v0.25.0-beta.1
+[0.24.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.23.0-beta.1...v0.24.0-beta.1
+[0.23.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.22.0-beta.1...v0.23.0-beta.1
+[0.22.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.5...v0.22.0-beta.1
+[0.21.0-beta.5]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.4...v0.21.0-beta.5
+[0.21.0-beta.4]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...v0.21.0-beta.4
+[0.21.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...v0.21.0-beta.3
+[0.21.0-beta.2]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.1...v0.21.0-beta.2
+[0.21.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.20.0-beta.1...v0.21.0-beta.1
+[0.20.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.19.0...v0.20.0-beta.1
 [0.18.2]: https://github.com/kaijen/kailibrate/compare/v0.18.1...v0.18.2
 [0.18.1]: https://github.com/kaijen/kailibrate/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/kaijen/kailibrate/compare/v0.17.4...v0.18.0

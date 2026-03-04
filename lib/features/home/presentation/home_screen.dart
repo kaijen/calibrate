@@ -179,6 +179,11 @@ class HomeScreen extends ConsumerWidget {
           label: 'Einstellungen',
           onTap: () => context.push('/settings'),
         ),
+        _NavCard(
+          icon: Icons.auto_awesome,
+          label: 'KI-Generator',
+          onTap: () => context.push('/ai-generator'),
+        ),
       ],
     );
   }

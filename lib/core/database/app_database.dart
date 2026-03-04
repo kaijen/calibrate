@@ -23,8 +23,8 @@ class Questions extends Table {
       dateTime().withDefault(currentDateAndTime)();
   // v2: Vorhersagetyp
   TextColumn get predictionType =>
-      text().withDefault(const Constant('probability'))();
-  // 'probability' | 'binary' | 'interval'
+      text().withDefault(const Constant('binary'))();
+  // 'binary' | 'factual' | 'interval'
   // v3: Einheit für interval-Typ (z. B. "m", "°C")
   TextColumn get unit => text().nullable()();
 }
@@ -107,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -123,6 +123,24 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.addColumn(questions, questions.unit);
+          }
+          if (from < 4) {
+            // Migrate epistemic binary questions to the new 'factual' type.
+            await m.database.customStatement(
+              "UPDATE questions SET prediction_type = 'factual' "
+              "WHERE prediction_type = 'binary' AND category = 'epistemic'",
+            );
+          }
+          if (from < 5) {
+            // v5: probability type removed; remap to binary (aleatory) or factual (epistemic).
+            await m.database.customStatement(
+              "UPDATE questions SET prediction_type = 'binary' "
+              "WHERE prediction_type = 'probability' AND category = 'aleatory'",
+            );
+            await m.database.customStatement(
+              "UPDATE questions SET prediction_type = 'factual' "
+              "WHERE prediction_type = 'probability' AND category = 'epistemic'",
+            );
           }
         },
       );
@@ -151,6 +169,10 @@ class AppDatabase extends _$AppDatabase {
   Future<void> updateQuestionTags(int id, List<String> tags) =>
       (update(questions)..where((q) => q.id.equals(id)))
           .write(QuestionsCompanion(tags: Value(jsonEncode(tags))));
+
+  Future<void> updateDeadline(int id, DateTime? deadline) =>
+      (update(questions)..where((q) => q.id.equals(id)))
+          .write(QuestionsCompanion(deadline: Value(deadline)));
 
   // --- Estimates ---
 
@@ -255,8 +277,7 @@ class AppDatabase extends _$AppDatabase {
       result.add({
         'text': q.questionText,
         'category': q.category,
-        if (q.predictionType != 'probability')
-          'predictionType': q.predictionType,
+        'predictionType': q.predictionType,
         'tags': jsonDecode(q.tags),
         if (q.deadline != null) 'deadline': q.deadline!.toIso8601String(),
         'hasKnownAnswer': q.hasKnownAnswer,
