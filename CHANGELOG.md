@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.0-beta.1] - 2026-03-04
+
+### Changed
+- Restructured docs with why/what/how narrative flow
+- New Konzepte page covering calibration, categories, types, and states
+- New KI-Generator page with step-by-step usage guide
+- Removed deprecated probability type from examples
+- Fixed stale navigation description in prediction workflow
+
 ## [0.25.0-beta.1] - 2026-03-04
 
 ### Added
@@ -469,7 +478,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.25.0-beta.1...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.26.0-beta.1...HEAD
+[0.26.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.25.0-beta.1...v0.26.0-beta.1
 [0.25.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.24.0-beta.1...v0.25.0-beta.1
 [0.24.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.23.0-beta.1...v0.24.0-beta.1
 [0.23.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.22.0-beta.1...v0.23.0-beta.1
