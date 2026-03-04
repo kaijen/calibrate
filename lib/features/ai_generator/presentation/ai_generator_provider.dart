@@ -20,6 +20,7 @@ class AiGeneratorState {
   final String? errorMessage;
   final double? generationCost;
   final int? generationTokens;
+  final bool excludePastDeadlines;
 
   const AiGeneratorState({
     this.phase = AiGeneratorPhase.form,
@@ -31,6 +32,7 @@ class AiGeneratorState {
     this.errorMessage,
     this.generationCost,
     this.generationTokens,
+    this.excludePastDeadlines = true,
   });
 
   AiGeneratorState copyWith({
@@ -45,6 +47,7 @@ class AiGeneratorState {
     bool clearResult = false,
     Object? generationCost = _sentinel,
     Object? generationTokens = _sentinel,
+    bool? excludePastDeadlines,
   }) {
     return AiGeneratorState(
       phase: phase ?? this.phase,
@@ -61,6 +64,7 @@ class AiGeneratorState {
       generationTokens: generationTokens == _sentinel
           ? this.generationTokens
           : generationTokens as int?,
+      excludePastDeadlines: excludePastDeadlines ?? this.excludePastDeadlines,
     );
   }
 }
@@ -83,6 +87,12 @@ class AiGeneratorNotifier extends StateNotifier<AiGeneratorState> {
 
   void setTags(String tags) {
     state = state.copyWith(tags: tags);
+  }
+
+  void toggleExcludePast() {
+    state = state.copyWith(
+      excludePastDeadlines: !state.excludePastDeadlines,
+    );
   }
 
   void reset() {
@@ -119,9 +129,11 @@ class AiGeneratorNotifier extends StateNotifier<AiGeneratorState> {
         return;
       }
 
+      final today = DateTime.now().toIso8601String().substring(0, 10);
       String prompt = state.selectedTemplate!.body
           .replaceAll('{topic}', topic.trim())
-          .replaceAll('{count}', '${state.count}');
+          .replaceAll('{count}', '${state.count}')
+          .replaceAll('{date}', today);
 
       final tagsStr = state.tags.trim();
       if (tagsStr.isNotEmpty) {

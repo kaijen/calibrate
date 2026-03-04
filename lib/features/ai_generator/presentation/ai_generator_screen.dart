@@ -255,6 +255,13 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
   ) {
     final file = genState.result!;
     final notifier = ref.read(aiGeneratorProvider.notifier);
+    final now = DateTime.now();
+    final pastCount = file.questions
+        .where((q) => q.deadline != null && q.deadline!.isBefore(now))
+        .length;
+    final importCount = genState.excludePastDeadlines
+        ? file.questions.length - pastCount
+        : file.questions.length;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -287,6 +294,64 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
               ),
             ),
           ),
+          if (pastCount > 0) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: Colors.orange.withValues(alpha: 0.4)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.warning_amber,
+                          size: 16, color: Colors.orange),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '$pastCount ${pastCount == 1 ? 'Frage hat' : 'Fragen haben'} '
+                          'eine Deadline in der Vergangenheit.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.orange),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: Checkbox(
+                          value: genState.excludePastDeadlines,
+                          onChanged: (_) => notifier.toggleExcludePast(),
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => notifier.toggleExcludePast(),
+                        child: Text(
+                          'Vergangene Fragen beim Import ausschließen',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Text('Fragen (erste 5)',
               style: Theme.of(context).textTheme.titleSmall),
@@ -339,8 +404,10 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
             width: double.infinity,
             child: FilledButton.icon(
               icon: const Icon(Icons.upload),
-              label: Text('${file.questions.length} importieren'),
-              onPressed: () => _doImport(context, ref, file, genState),
+              label: Text('$importCount importieren'),
+              onPressed: importCount == 0
+                  ? null
+                  : () => _doImport(context, ref, file, genState),
             ),
           ),
         ],
@@ -404,8 +471,16 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
     final db = ref.read(appDatabaseProvider);
 
     try {
+      final now = DateTime.now();
+      final questionsToImport = genState.excludePastDeadlines
+          ? file.questions
+              .where((q) =>
+                  q.deadline == null || !q.deadline!.isBefore(now))
+              .toList()
+          : file.questions;
+
       await db.transaction(() async {
-        for (final q in file.questions) {
+        for (final q in questionsToImport) {
           final tagsJson = jsonEncode(q.tags);
           final id = await db.insertQuestion(
             QuestionsCompanion.insert(
@@ -469,7 +544,7 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
           ImportBatchesCompanion.insert(
             filename: 'KI-Generator',
             source: drift.Value(file.source),
-            questionCount: file.questions.length,
+            questionCount: questionsToImport.length,
           ),
         );
       });
@@ -481,7 +556,7 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content:
-                  Text('${file.questions.length} Fragen importiert')),
+                  Text('${questionsToImport.length} Fragen importiert')),
         );
       }
     } catch (e) {

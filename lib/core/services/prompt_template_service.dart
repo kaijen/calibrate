@@ -123,12 +123,14 @@ Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder dana
       body: r'''Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: {topic}
 Anzahl: {count}
+Heutiges Datum: {date}
 
 Regeln:
 - Jede Frage ist eine zukunftsbezogene Aussage, die eintreten kann oder nicht.
 - Formulierung als Aussagesatz im Präsens oder Futur (z.B. „Deutschland gewinnt die Fußball-WM 2026.").
 - predictionType: "binary" – der Nutzer schätzt Ja oder Nein.
 - Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- Alle Ereignisse und Deadlines liegen nach dem {date}.
 - "deadline": ISO-8601-Datum, bis wann die Frage spätestens aufgelöst werden kann.
 - Tags: 1–3 thematische Schlagworte auf Englisch.
 - Schwierigkeitsgrad: gemischt – einige wahrscheinlicher, einige weniger.
@@ -156,12 +158,14 @@ Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder dana
       body: r'''Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: {topic}
 Anzahl: {count}
+Heutiges Datum: {date}
 
 Regeln:
 - Jede Frage fragt nach einem zukünftigen messbaren Wert, der noch nicht feststeht.
 - Formulierung als Aussagesatz über eine konkrete Messgröße (z.B. „Der DAX schließt am 31.12.2026 bei X Punkten.").
 - predictionType: "interval" – der Nutzer gibt Unter- und Obergrenze an.
 - Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- Alle Ereignisse und Deadlines liegen nach dem {date}.
 - "deadline": ISO-8601-Datum, ab dem der Wert bekannt ist.
 - "unit": Einheit des Messwertes (z.B. "Punkte", "°C", "%", "Mrd. €").
 - Tags: 1–3 thematische Schlagworte auf Englisch.
