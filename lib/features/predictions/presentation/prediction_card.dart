@@ -114,33 +114,49 @@ class PredictionCard extends StatelessWidget {
                     ),
                     if (prediction.resolution != null) ...[
                       const SizedBox(width: 16),
-                      Icon(
-                        prediction.resolution!.outcome
-                            ? Icons.check_circle
-                            : Icons.cancel,
-                        size: 16,
-                        color: prediction.resolution!.outcome
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        () {
-                          final res = prediction.resolution!;
-                          if (prediction.question.predictionType == 'interval' &&
-                              res.numericOutcome != null) {
-                            final unit = prediction.estimate?.unit ?? '';
-                            final u = unit.isNotEmpty ? ' $unit' : '';
-                            return '${formatNum(res.numericOutcome)}$u';
-                          }
-                          return res.outcome ? 'Ja' : 'Nein';
-                        }(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: prediction.resolution!.outcome
-                                  ? Colors.green
-                                  : Colors.red,
+                      Builder(builder: (context) {
+                        final res = prediction.resolution!;
+                        final type = prediction.question.predictionType;
+                        final isBinaryCorrect = type == 'binary' &&
+                            prediction.estimate?.binaryChoice == res.outcome;
+                        final isPositive =
+                            type == 'binary' ? isBinaryCorrect : res.outcome;
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isPositive
+                                  ? Icons.check_circle
+                                  : Icons.cancel,
+                              size: 16,
+                              color:
+                                  isPositive ? Colors.green : Colors.red,
                             ),
-                      ),
+                            const SizedBox(width: 4),
+                            Text(
+                              () {
+                                if (type == 'interval' &&
+                                    res.numericOutcome != null) {
+                                  final unit =
+                                      prediction.estimate?.unit ?? '';
+                                  final u =
+                                      unit.isNotEmpty ? ' $unit' : '';
+                                  return '${formatNum(res.numericOutcome)}$u';
+                                }
+                                return res.outcome ? 'Ja' : 'Nein';
+                              }(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: isPositive
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                            ),
+                          ],
+                        );
+                      }),
                     ],
                   ],
                 ),

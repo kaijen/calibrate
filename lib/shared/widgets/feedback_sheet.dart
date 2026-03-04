@@ -45,6 +45,15 @@ class CalibrationFeedbackSheet extends StatelessWidget {
     };
   }
 
+  // For binary questions, correctness depends on whether the predicted
+  // direction matches the outcome, not just on outcome being true.
+  bool _isCorrect() {
+    if (predictionType == 'binary' && estimate != null) {
+      return estimate!.binaryChoice == outcome;
+    }
+    return outcome;
+  }
+
   double _brierContribution() {
     final p = estimate!.probability;
     final o = outcome ? 1.0 : 0.0;
@@ -53,7 +62,8 @@ class CalibrationFeedbackSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outcomeColor = outcome ? Colors.green : Colors.red;
+    final isCorrect = _isCorrect();
+    final outcomeColor = isCorrect ? Colors.green : Colors.red;
     final typeLabel = _typeLabels[predictionType] ?? predictionType;
     final showTypeSection = typeStats.totalCount < overallStats.totalCount;
 
@@ -75,13 +85,15 @@ class CalibrationFeedbackSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    outcome ? Icons.check_circle : Icons.cancel,
+                    isCorrect ? Icons.check_circle : Icons.cancel,
                     color: outcomeColor,
                     size: 28,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    outcome ? 'Eingetreten' : 'Nicht eingetreten',
+                    predictionType == 'binary'
+                        ? (isCorrect ? 'Richtig' : 'Falsch')
+                        : (outcome ? 'Eingetreten' : 'Nicht eingetreten'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: outcomeColor,
                           fontWeight: FontWeight.bold,

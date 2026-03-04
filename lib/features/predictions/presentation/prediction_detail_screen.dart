@@ -139,31 +139,37 @@ class _DetailBody extends StatelessWidget {
                   Text('Auflösung',
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        resolution.outcome
-                            ? Icons.check_circle
-                            : Icons.cancel,
-                        color:
-                            resolution.outcome ? Colors.green : Colors.red,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        resolution.outcome ? 'Ja' : 'Nein',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: resolution.outcome
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                      ),
-                    ],
-                  ),
+                  Builder(builder: (context) {
+                    final isBinaryCorrect =
+                        q.predictionType == 'binary' &&
+                            estimate?.binaryChoice == resolution.outcome;
+                    final isPositive = q.predictionType == 'binary'
+                        ? isBinaryCorrect
+                        : resolution.outcome;
+                    return Row(
+                      children: [
+                        Icon(
+                          isPositive
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: isPositive ? Colors.green : Colors.red,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          resolution.outcome ? 'Ja' : 'Nein',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isPositive ? Colors.green : Colors.red,
+                              ),
+                        ),
+                      ],
+                    );
+                  }),
                   if (resolution.numericOutcome != null) ...[
                     const SizedBox(height: 4),
                     Text(
