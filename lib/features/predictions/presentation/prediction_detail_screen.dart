@@ -1,50 +1,139 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../core/services/notification_service.dart';
 
-class PredictionDetailScreen extends ConsumerWidget {
+class PredictionDetailScreen extends ConsumerStatefulWidget {
   final int questionId;
 
   const PredictionDetailScreen({super.key, required this.questionId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PredictionDetailScreen> createState() =>
+      _PredictionDetailScreenState();
+}
+
+class _PredictionDetailScreenState
+    extends ConsumerState<PredictionDetailScreen> {
+  PredictionView? _prediction;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    final db = ref.read(appDatabaseProvider);
+    final views = await db.getAllPredictionViews();
+    final p = views
+        .where((v) => v.question.id == widget.questionId)
+        .firstOrNull;
+    if (mounted) setState(() { _prediction = p; _loading = false; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final db = ref.watch(appDatabaseProvider);
+    final prediction = _prediction;
+
+    Widget? fab;
+    if (!_loading && prediction != null) {
+      fab = switch (prediction.status) {
+        PredictionStatus.pending => FloatingActionButton.extended(
+            onPressed: () async {
+              await context.push('/estimate/${widget.questionId}');
+              _load();
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('Schätzen'),
+          ),
+        PredictionStatus.needsResolution => FloatingActionButton.extended(
+            onPressed: () async {
+              await context.push('/resolve/${widget.questionId}');
+              _load();
+            },
+            icon: const Icon(Icons.check_circle_outline),
+            label: const Text('Auflösen'),
+          ),
+        PredictionStatus.resolved => null,
+      };
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Details')),
-      body: FutureBuilder<PredictionView?>(
-        future: _load(db),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Fehler: ${snapshot.error}'));
-          }
-          final prediction = snapshot.data;
-          if (prediction == null) {
-            return const Center(child: Text('Vorhersage nicht gefunden'));
-          }
-          return _DetailBody(prediction: prediction);
-        },
-      ),
+      floatingActionButton: fab,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : prediction == null
+              ? const Center(child: Text('Vorhersage nicht gefunden'))
+              : _DetailBody(
+                  prediction: prediction,
+                  db: db,
+                  onReload: _load,
+                ),
     );
-  }
-
-  Future<PredictionView?> _load(AppDatabase db) async {
-    final views = await db.getAllPredictionViews();
-    return views.where((v) => v.question.id == questionId).firstOrNull;
   }
 }
 
 class _DetailBody extends StatelessWidget {
   final PredictionView prediction;
+  final AppDatabase db;
+  final VoidCallback onReload;
 
-  const _DetailBody({required this.prediction});
+  const _DetailBody({
+    required this.prediction,
+    required this.db,
+    required this.onReload,
+  });
+
+  bool get _canEditDeadline =>
+      prediction.status != PredictionStatus.resolved;
+
+  Future<void> _editDeadline(BuildContext context) async {
+    final q = prediction.question;
+    final now = DateTime.now();
+    final firstDate = DateTime(2020);
+    final lastDate = DateTime(2040);
+    final initial = (q.deadline != null &&
+            !q.deadline!.isBefore(firstDate) &&
+            !q.deadline!.isAfter(lastDate))
+        ? q.deadline!
+        : now;
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+    if (picked == null || !context.mounted) return;
+    await db.updateDeadline(q.id, picked);
+    if (picked.isAfter(now)) {
+      await NotificationService.instance.scheduleDeadlineNotifications(
+        q.id,
+        q.questionText,
+        picked,
+      );
+    } else {
+      await NotificationService.instance.cancelNotificationsForQuestion(q.id);
+    }
+    onReload();
+  }
+
+  Future<void> _clearDeadline() async {
+    final q = prediction.question;
+    await db.updateDeadline(q.id, null);
+    await NotificationService.instance.cancelNotificationsForQuestion(q.id);
+    onReload();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +141,7 @@ class _DetailBody extends StatelessWidget {
     final estimate = prediction.estimate;
     final resolution = prediction.resolution;
     final dateFormat = DateFormat('dd.MM.yyyy HH:mm');
+    final deadlineFmt = DateFormat('dd.MM.yyyy');
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -87,11 +177,14 @@ class _DetailBody extends StatelessWidget {
                   Text('Quelle: ${q.source}',
                       style: Theme.of(context).textTheme.bodySmall),
                 ],
-                if (q.deadline != null) ...[
-                  const SizedBox(height: 4),
-                  Text('Deadline: ${dateFormat.format(q.deadline!)}',
-                      style: Theme.of(context).textTheme.bodySmall),
-                ],
+                const SizedBox(height: 4),
+                _DeadlineRow(
+                  deadline: q.deadline,
+                  canEdit: _canEditDeadline,
+                  dateFormat: deadlineFmt,
+                  onEdit: () => _editDeadline(context),
+                  onClear: _clearDeadline,
+                ),
               ],
             ),
           ),
@@ -200,6 +293,64 @@ class _DetailBody extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _DeadlineRow extends StatelessWidget {
+  final DateTime? deadline;
+  final bool canEdit;
+  final DateFormat dateFormat;
+  final VoidCallback onEdit;
+  final VoidCallback onClear;
+
+  const _DeadlineRow({
+    required this.deadline,
+    required this.canEdit,
+    required this.dateFormat,
+    required this.onEdit,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!canEdit && deadline == null) return const SizedBox.shrink();
+
+    final textStyle = Theme.of(context).textTheme.bodySmall;
+    final iconColor = textStyle?.color;
+
+    return Row(
+      children: [
+        Icon(Icons.event, size: 16, color: iconColor),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            deadline != null
+                ? 'Deadline: ${dateFormat.format(deadline!)}'
+                : 'Keine Deadline',
+            style: textStyle,
+          ),
+        ),
+        if (canEdit) ...[
+          InkWell(
+            onTap: onEdit,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(Icons.edit_calendar, size: 16, color: iconColor),
+            ),
+          ),
+          if (deadline != null)
+            InkWell(
+              onTap: onClear,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Icon(Icons.clear, size: 16, color: iconColor),
+              ),
+            ),
+        ],
       ],
     );
   }

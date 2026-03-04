@@ -170,6 +170,10 @@ class AppDatabase extends _$AppDatabase {
       (update(questions)..where((q) => q.id.equals(id)))
           .write(QuestionsCompanion(tags: Value(jsonEncode(tags))));
 
+  Future<void> updateDeadline(int id, DateTime? deadline) =>
+      (update(questions)..where((q) => q.id.equals(id)))
+          .write(QuestionsCompanion(deadline: Value(deadline)));
+
   // --- Estimates ---
 
   Future<Estimate?> getEstimateForQuestion(int questionId) =>

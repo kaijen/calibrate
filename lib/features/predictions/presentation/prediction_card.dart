@@ -24,6 +24,9 @@ class PredictionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final q = prediction.question;
+    final isOverdue = prediction.status != PredictionStatus.resolved &&
+        q.deadline != null &&
+        q.deadline!.isBefore(DateTime.now());
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -58,7 +61,16 @@ class PredictionCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _StatusBadge(status: prediction.status),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _StatusBadge(status: prediction.status),
+                      if (isOverdue) ...[
+                        const SizedBox(height: 2),
+                        const _OverdueBadge(),
+                      ],
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -218,6 +230,27 @@ class _StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+      ),
+    );
+  }
+}
+
+class _OverdueBadge extends StatelessWidget {
+  const _OverdueBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.withOpacity(0.5)),
+      ),
+      child: Text(
+        'Überfällig',
+        style:
+            Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.red),
       ),
     );
   }

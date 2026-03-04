@@ -302,14 +302,7 @@ class _PredictionList extends StatelessWidget {
       onToggleSelect(prediction.question.id);
       return;
     }
-    switch (prediction.status) {
-      case PredictionStatus.pending:
-        context.push('/estimate/${prediction.question.id}');
-      case PredictionStatus.needsResolution:
-        context.push('/resolve/${prediction.question.id}');
-      case PredictionStatus.resolved:
-        context.push('/prediction/${prediction.question.id}');
-    }
+    context.push('/prediction/${prediction.question.id}');
   }
 
   @override
