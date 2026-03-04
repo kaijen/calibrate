@@ -24,7 +24,7 @@ Regeln:
 - Jede Frage ist eine Wahr/Falsch-Frage mit eindeutiger, verifizierbarer Antwort.
 - Schwierigkeitsgrad: gemischt – einige überraschend wahr, einige überraschend falsch.
 - predictionType ist immer "factual".
-- Kein Schätzfeld (kein "probability") – der Nutzer schätzt selbst.
+- Kein Schätzfeld – der Nutzer schätzt selbst.
 - "resolution.outcome" enthält die korrekte Antwort (true = Wahr, false = Falsch).
 - "resolution.notes" enthält eine kurze Erklärung oder Quelle.
 - Tags: 1–3 thematische Schlagworte auf Englisch.
@@ -97,39 +97,76 @@ Format:
 
 ---
 
-## Prompt: Gemischter Katalog (Wahr/Falsch + Intervall)
+## Prompt: Aleatorische Ja/Nein-Prognosen
 
-Für abwechslungsreichere Übungen mit verschiedenen Fragetypen.
+Geeignet für zukunftsbezogene Ereignisse, bei denen die Antwort noch unbekannt ist. Kein `resolution`-Feld – der Nutzer löst später selbst auf.
 
 ```
-Erstelle einen gemischten Fragenkatalog für die App Kailibrate im JSON-Format.
-Thema: [THEMA]
-Anzahl: [ANZAHL] Fragen, davon etwa die Hälfte Wahr/Falsch, die Hälfte Intervall.
+Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
+Thema: [THEMA, z.B. "Bundesliga-Saison 2025/26" oder "Wirtschaft 2026"]
+Anzahl: [ANZAHL, z.B. 10]
 
-Regeln für Wahr/Falsch-Fragen:
-- predictionType: "factual"
-- "resolution.outcome": true oder false
-- "resolution.notes": kurze Erklärung
+Regeln:
+- Jede Frage ist eine zukunftsbezogene Aussage, die eintreten kann oder nicht.
+- Formulierung als Aussagesatz im Präsens oder Futur (z.B. "Deutschland gewinnt die Fußball-WM 2026.").
+- predictionType: "binary" – der Nutzer schätzt Ja oder Nein.
+- Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- "deadline": ISO-8601-Datum, bis wann die Frage spätestens aufgelöst werden kann.
+- Tags: 1–3 thematische Schlagworte auf Englisch.
+- Schwierigkeitsgrad: gemischt – einige wahrscheinlicher, einige weniger.
 
-Regeln für Intervall-Fragen:
-- predictionType: "interval"
-- "unit" angeben
-- "resolution.numericOutcome": tatsächlicher Wert
-- "resolution.outcome": true
-- "resolution.notes": Wert mit Quelle
-
-Für alle Fragen:
-- Kein Schätzfeld – der Nutzer schätzt selbst.
-- Tags: 1–3 Schlagworte auf Englisch.
-- Schwierigkeitsgrad: gemischt.
-
-Ausgabe ausschließlich als valides JSON.
+Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder danach.
 
 {
   "version": 1,
-  "category": "epistemic",
+  "category": "aleatory",
   "source": "[THEMA]",
-  "questions": [ ... ]
+  "questions": [
+    {
+      "text": "Aussage, die eintreten kann oder nicht.",
+      "tags": ["tag1", "tag2"],
+      "predictionType": "binary",
+      "deadline": "2026-12-31"
+    }
+  ]
+}
+```
+
+---
+
+## Prompt: Aleatorische Intervall-Prognosen
+
+Geeignet für zukünftige Messwerte, die noch nicht feststehen. Kein `resolution`-Feld.
+
+```
+Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
+Thema: [THEMA, z.B. "Wirtschaftsindikatoren 2026" oder "Wetter im Sommer 2026"]
+Anzahl: [ANZAHL, z.B. 10]
+
+Regeln:
+- Jede Frage fragt nach einem zukünftigen messbaren Wert, der noch nicht feststeht.
+- Formulierung als Aussagesatz über eine konkrete Messgröße (z.B. "Der DAX schließt am 31.12.2026 bei X Punkten.").
+- predictionType: "interval" – der Nutzer gibt Unter- und Obergrenze an.
+- Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- "deadline": ISO-8601-Datum, ab dem der Wert bekannt ist.
+- "unit": Einheit des Messwertes (z.B. "Punkte", "°C", "%", "Mrd. €").
+- Tags: 1–3 thematische Schlagworte auf Englisch.
+
+Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder danach.
+
+{
+  "version": 1,
+  "category": "aleatory",
+  "source": "[THEMA]",
+  "questions": [
+    {
+      "text": "Der DAX schließt am 31.12.2026 bei X Punkten.",
+      "tags": ["finance", "dax"],
+      "predictionType": "interval",
+      "unit": "Punkte",
+      "deadline": "2026-12-31"
+    }
+  ]
 }
 ```
 

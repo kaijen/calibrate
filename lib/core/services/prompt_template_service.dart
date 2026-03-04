@@ -117,37 +117,70 @@ Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder dana
 }''',
     ),
     PromptTemplate(
-      id: 'default_mixed',
-      name: 'Gemischter Katalog',
+      id: 'default_aleatory_binary',
+      name: 'Ja/Nein-Prognosen (aleatorisch)',
       isDefault: true,
-      body: r'''Erstelle einen gemischten Fragenkatalog für die App Kailibrate im JSON-Format.
+      body: r'''Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
 Thema: {topic}
-Anzahl: {count} Fragen, davon etwa die Hälfte Wahr/Falsch, die Hälfte Intervall.
+Anzahl: {count}
 
-Regeln für Wahr/Falsch-Fragen:
-- predictionType: "factual"
-- "resolution.outcome": true oder false
-- "resolution.notes": kurze Erklärung
+Regeln:
+- Jede Frage ist eine zukunftsbezogene Aussage, die eintreten kann oder nicht.
+- Formulierung als Aussagesatz im Präsens oder Futur (z.B. „Deutschland gewinnt die Fußball-WM 2026.").
+- predictionType: "binary" – der Nutzer schätzt Ja oder Nein.
+- Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- "deadline": ISO-8601-Datum, bis wann die Frage spätestens aufgelöst werden kann.
+- Tags: 1–3 thematische Schlagworte auf Englisch.
+- Schwierigkeitsgrad: gemischt – einige wahrscheinlicher, einige weniger.
 
-Regeln für Intervall-Fragen:
-- predictionType: "interval"
-- "unit" angeben
-- "resolution.numericOutcome": tatsächlicher Wert
-- "resolution.outcome": true
-- "resolution.notes": Wert mit Quelle
-
-Für alle Fragen:
-- Kein Schätzfeld – der Nutzer schätzt selbst.
-- Tags: 1–3 Schlagworte auf Englisch.
-- Schwierigkeitsgrad: gemischt.
-
-Ausgabe ausschließlich als valides JSON.
+Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder danach.
 
 {
   "version": 1,
-  "category": "epistemic",
+  "category": "aleatory",
   "source": "{topic}",
-  "questions": [ ... ]
+  "questions": [
+    {
+      "text": "Aussage, die eintreten kann oder nicht.",
+      "tags": ["tag1", "tag2"],
+      "predictionType": "binary",
+      "deadline": "2026-12-31"
+    }
+  ]
+}''',
+    ),
+    PromptTemplate(
+      id: 'default_aleatory_interval',
+      name: 'Intervall-Prognosen (aleatorisch)',
+      isDefault: true,
+      body: r'''Erstelle einen Fragenkatalog für die App Kailibrate im JSON-Format.
+Thema: {topic}
+Anzahl: {count}
+
+Regeln:
+- Jede Frage fragt nach einem zukünftigen messbaren Wert, der noch nicht feststeht.
+- Formulierung als Aussagesatz über eine konkrete Messgröße (z.B. „Der DAX schließt am 31.12.2026 bei X Punkten.").
+- predictionType: "interval" – der Nutzer gibt Unter- und Obergrenze an.
+- Die Antwort ist noch nicht bekannt – KEIN "resolution"-Feld.
+- "deadline": ISO-8601-Datum, ab dem der Wert bekannt ist.
+- "unit": Einheit des Messwertes (z.B. "Punkte", "°C", "%", "Mrd. €").
+- Tags: 1–3 thematische Schlagworte auf Englisch.
+
+Ausgabe ausschließlich als valides JSON, kein erklärender Text davor oder danach.
+
+{
+  "version": 1,
+  "category": "aleatory",
+  "source": "{topic}",
+  "questions": [
+    {
+      "text": "Der DAX schließt am 31.12.2026 bei X Punkten.",
+      "tags": ["finance", "dax"],
+      "predictionType": "interval",
+      "unit": "Punkte",
+      "deadline": "2026-12-31"
+    }
+  ]
 }''',
     ),
   ];
