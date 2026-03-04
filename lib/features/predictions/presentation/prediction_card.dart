@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/format_utils.dart';
 
@@ -24,9 +25,14 @@ class PredictionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final q = prediction.question;
+    final now = DateTime.now();
     final isOverdue = prediction.status != PredictionStatus.resolved &&
         q.deadline != null &&
-        q.deadline!.isBefore(DateTime.now());
+        q.deadline!.isBefore(now);
+    final isSoon = !isOverdue &&
+        prediction.status != PredictionStatus.resolved &&
+        q.deadline != null &&
+        q.deadline!.isBefore(now.add(const Duration(days: 7)));
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -93,6 +99,14 @@ class PredictionCard extends StatelessWidget {
                       ),
                 ],
               ),
+              if (q.deadline != null) ...[
+                const SizedBox(height: 6),
+                _DeadlineChip(
+                  deadline: q.deadline!,
+                  isOverdue: isOverdue,
+                  isSoon: isSoon,
+                ),
+              ],
               if (prediction.estimate == null &&
                   prediction.resolution != null) ...[
                 const SizedBox(height: 8),
@@ -205,6 +219,42 @@ String _estimateLabel(PredictionView prediction) {
       }(),
     _ => '${(estimate.probability * 100).round()} %',
   };
+}
+
+class _DeadlineChip extends StatelessWidget {
+  final DateTime deadline;
+  final bool isOverdue;
+  final bool isSoon;
+
+  const _DeadlineChip({
+    required this.deadline,
+    required this.isOverdue,
+    required this.isSoon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    if (isOverdue) {
+      color = Colors.red;
+    } else if (isSoon) {
+      color = Colors.orange;
+    } else {
+      color = Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.event, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          DateFormat('dd.MM.yyyy').format(deadline),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+        ),
+      ],
+    );
+  }
 }
 
 class _StatusBadge extends StatelessWidget {
