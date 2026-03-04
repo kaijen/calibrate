@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0-beta.5] - 2026-03-04
+
+### Added
+- New 'factual' predictionType for epistemic Wahr/Falsch questions,
+  distinct from 'binary' (Ja/Nein) used for aleatory events (#43)
+- Wahr/Falsch buttons in estimate, resolve, feedback, card, and detail
+  views for factual questions (#43)
+
+### Changed
+- DB migration v4 converts existing epistemic binary entries to factual (#43)
+- New-prediction screen shows Wahr/Falsch segment only for epistemic
+  category; Ja/Nein stays for aleatory (#43)
+- Default AI prompt template updated to use predictionType "factual" (#43)
+
+### Fixed
+- Binary feedback banner now shows actual Ja/Nein answer below
+  Richtig/Falsch verdict (#42)
+
 ## [0.21.0-beta.4] - 2026-03-04
 
 ### Fixed
@@ -408,7 +426,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.4...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.5...HEAD
+[0.21.0-beta.5]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.4...v0.21.0-beta.5
 [0.21.0-beta.4]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...v0.21.0-beta.4
 [0.21.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...v0.21.0-beta.3
 [0.21.0-beta.2]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.1...v0.21.0-beta.2
