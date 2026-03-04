@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0-beta.1] - 2026-03-04
+
+### Added
+- Aleatory AI templates for binary (Ja/Nein) and interval predictions
+  on future events without known answers (#46)
+
+### Changed
+- `probability` prediction type removed; replaced by `binary` (aleatory)
+  and `factual` (epistemic) throughout the app (#45)
+- Import parser remaps legacy `probability` entries to `binary`/`factual`
+  based on category; schema migrated to v5 (#45)
+- Stats and feedback screens updated to reflect new type set (#44, #45)
+- Mixed AI template removed in favour of the two focused aleatory
+  templates (#46)
+- LLM prompt docs and type reference updated (#45, #46)
+
 ## [0.21.0-beta.5] - 2026-03-04
 
 ### Added
@@ -426,7 +442,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.5...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v0.22.0-beta.1...HEAD
+[0.22.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.5...v0.22.0-beta.1
 [0.21.0-beta.5]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.4...v0.21.0-beta.5
 [0.21.0-beta.4]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.3...v0.21.0-beta.4
 [0.21.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v0.21.0-beta.2...v0.21.0-beta.3
