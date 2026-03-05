@@ -25,6 +25,7 @@ Das Antippen einer Vorhersagenkarte öffnet immer die **Detail-Ansicht**. Von do
 | Neue Vorhersage | **+**-Symbol tippen |
 | Schätzen | Karte antippen → Detail-Ansicht → **Schätzen**-Button |
 | Auflösen | Karte antippen → Detail-Ansicht → **Auflösen**-Button |
+| Vorhersage löschen | Auflösungsseite → **Papierkorb-Symbol** (AppBar) |
 | Mehrere auswählen | Karte lang drücken |
 
 ---
