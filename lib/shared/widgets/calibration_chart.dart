@@ -14,7 +14,7 @@ class CalibrationChart extends StatelessWidget {
 
     // Perfect calibration line spots
     final diagonalSpots = [
-      const FlSpot(0, 0),
+      const FlSpot(0.5, 0.5),
       const FlSpot(1, 1),
     ];
 
@@ -26,7 +26,7 @@ class CalibrationChart extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: LineChart(
           LineChartData(
-            minX: 0,
+            minX: 0.5,
             maxX: 1,
             minY: 0,
             maxY: 1,

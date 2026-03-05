@@ -275,6 +275,7 @@ class IntervalEstimateInput extends StatelessWidget {
           value: state.confidenceLevel,
           onChanged: notifier.setConfidence,
           label: 'Konfidenz (Intervall enthält den wahren Wert)',
+          min: 0.5,
         ),
       ],
     );
