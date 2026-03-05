@@ -122,7 +122,7 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(resolutions, resolutions.numericOutcome);
           }
           if (from < 3) {
-            await m.addColumn(questions, questions.unit);
+            await m.addColumn(questions, questions.unit as GeneratedColumn<Object>);
           }
           if (from < 4) {
             // Migrate epistemic binary questions to the new 'factual' type.
@@ -176,6 +176,17 @@ class AppDatabase extends _$AppDatabase {
       final current = List<String>.from(jsonDecode(q.tags) as List);
       if (current.contains(tag)) {
         await updateQuestionTags(q.id, current..remove(tag));
+      }
+    }
+  }
+
+  Future<void> renameTagGlobally(String oldTag, String newTag) async {
+    final all = await select(questions).get();
+    for (final q in all) {
+      final current = List<String>.from(jsonDecode(q.tags) as List);
+      if (current.contains(oldTag)) {
+        final updated = current.map((t) => t == oldTag ? newTag : t).toList();
+        await updateQuestionTags(q.id, updated);
       }
     }
   }

@@ -248,6 +248,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           await db.deleteTagGlobally(tag);
           ref.invalidate(predictionsStreamProvider);
         },
+        onRename: (oldTag, newTag) async {
+          await db.renameTagGlobally(oldTag, newTag);
+          ref.invalidate(predictionsStreamProvider);
+        },
       ),
     );
   }
@@ -635,8 +639,13 @@ class _TemplateManagerDialogState extends State<_TemplateManagerDialog> {
 class _TagManagerDialog extends StatefulWidget {
   final List<String> tags;
   final Future<void> Function(String tag) onDelete;
+  final Future<void> Function(String oldTag, String newTag) onRename;
 
-  const _TagManagerDialog({required this.tags, required this.onDelete});
+  const _TagManagerDialog({
+    required this.tags,
+    required this.onDelete,
+    required this.onRename,
+  });
 
   @override
   State<_TagManagerDialog> createState() => _TagManagerDialogState();
@@ -649,6 +658,41 @@ class _TagManagerDialogState extends State<_TagManagerDialog> {
   void initState() {
     super.initState();
     _tags = List.from(widget.tags);
+  }
+
+  Future<void> _confirmRename(String tag) async {
+    final controller = TextEditingController(text: tag);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tag umbenennen'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Neuer Name'),
+          onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Umbenennen'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (newName == null || newName.isEmpty || newName == tag || !mounted) return;
+
+    await widget.onRename(tag, newName);
+    setState(() {
+      final i = _tags.indexOf(tag);
+      if (i != -1) _tags[i] = newName;
+      _tags.sort();
+    });
   }
 
   Future<void> _confirmDelete(String tag) async {
@@ -699,11 +743,21 @@ class _TagManagerDialogState extends State<_TagManagerDialog> {
                     leading: const Icon(Icons.label_outline),
                     title: Text(tag),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      color: Theme.of(context).colorScheme.error,
-                      tooltip: 'Tag löschen',
-                      onPressed: () => _confirmDelete(tag),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          tooltip: 'Tag umbenennen',
+                          onPressed: () => _confirmRename(tag),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          color: Theme.of(context).colorScheme.error,
+                          tooltip: 'Tag löschen',
+                          onPressed: () => _confirmDelete(tag),
+                        ),
+                      ],
                     ),
                   );
                 },
