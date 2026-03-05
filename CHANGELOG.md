@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1-beta.1] - 2026-03-05
+
+### Added
+- Calendar toggle in the pending tab AppBar to sort by deadline;
+  entries without a deadline stay at the end regardless of direction
+- Global tag manager in Settings to delete tags from all predictions
+  at once, with per-tag confirmation dialog (#70)
+
 ## [1.1.0-beta.1] - 2026-03-05
 
 ### Added
@@ -558,7 +566,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.1.0-beta.1...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.1.1-beta.1...HEAD
+[1.1.1-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.1.0-beta.1...v1.1.1-beta.1
 [1.1.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.0.0...v1.1.0-beta.1
 [1.0.0]: https://github.com/kaijen/kailibrate/compare/v0.28.0...v1.0.0
 [0.28.0]: https://github.com/kaijen/kailibrate/compare/v0.19.0...v0.28.0
