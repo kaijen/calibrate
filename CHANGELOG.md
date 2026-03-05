@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0-beta.1] - 2026-03-05
+
+### Added
+- "Ohne Tag" filter chip in prediction list; visible only when untagged
+  entries exist, visually distinct via secondary-color border (#72)
+- Rename action in the global tag manager; inline dialog with
+  pre-filled name, updates all predictions at once (#73)
+- Confidence slider now snaps to 5 % steps from 50 to 100 %;
+  one-time startup migration rounds existing values (#71)
+
+### Fixed
+- Type cast error in v3 schema migration (`addColumn` expected
+  `GeneratedColumn<Object>`) (#73)
+
 ## [1.1.1-beta.1] - 2026-03-05
 
 ### Added
@@ -566,7 +580,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.1.1-beta.1...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.2.0-beta.1...HEAD
+[1.2.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.1.1-beta.1...v1.2.0-beta.1
 [1.1.1-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.1.0-beta.1...v1.1.1-beta.1
 [1.1.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.0.0...v1.1.0-beta.1
 [1.0.0]: https://github.com/kaijen/kailibrate/compare/v0.28.0...v1.0.0
