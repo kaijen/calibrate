@@ -26,14 +26,14 @@ Schätzung: erst Richtung wählen (Wahr oder Falsch), dann Konfidenz einstellen 
 
 **Geeignet für:** epistemische Fragen mit bekannter Antwort (Trivia, historische Fakten, geografische Fragen).
 
-Beispiel: „Liegt Santiago de Chile östlich von New York? → Wahr, 35 % sicher"
+Beispiel: „Liegt Santiago de Chile östlich von New York? → Falsch, 65 % sicher"
 
 Import-Felder:
 
 ```yaml
 predictionType: factual
-binaryChoice: true      # true = Wahr, false = Falsch
-confidenceLevel: 0.35
+binaryChoice: false     # true = Wahr, false = Falsch
+confidenceLevel: 0.65
 ```
 
 ---

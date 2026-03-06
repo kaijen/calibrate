@@ -123,8 +123,8 @@ Enthält der Import Schätzfelder, werden sie direkt gespeichert und die Vorhers
       "text": "Gewinnt Deutschland die Fußball-WM 2026?",
       "tags": ["football", "germany"],
       "predictionType": "binary",
-      "binaryChoice": true,
-      "confidenceLevel": 0.30,
+      "binaryChoice": false,
+      "confidenceLevel": 0.70,
       "deadline": "2026-07-20"
     }
   ]

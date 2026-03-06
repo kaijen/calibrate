@@ -51,7 +51,7 @@ Der Typ bestimmt, wie geschätzt und wie aufgelöst wird.
 
 Für epistemische Fragen mit bekannter Antwort. Zuerst Richtung wählen (Wahr oder Falsch), dann Konfidenz (50–99 %). Die Antwort existiert – der Nutzer kennt sie nur nicht.
 
-Beispiel: „Liegt Santiago de Chile östlich von New York? → Wahr, 35 % sicher"
+Beispiel: „Liegt Santiago de Chile östlich von New York? → Falsch, 65 % sicher"
 
 ### Ja/Nein mit Konfidenz (`binary`)
 

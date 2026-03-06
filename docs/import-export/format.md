@@ -37,7 +37,7 @@ Schätzfelder enthalten eine vorausgefüllte Schätzung. Fehlen sie, muss der Nu
 |------|-------|--------------|
 | `predictionType` | `binary`, `factual`, `interval` | Bestimmt, welche weiteren Schätzfelder gelesen werden |
 | `binaryChoice` | `true` / `false` | Richtungswahl für `binary` (Ja/Nein) oder `factual` (Wahr/Falsch) |
-| `confidenceLevel` | 0–1, Standard: `0.9` | Konfidenz für Typen `binary`, `factual` und `interval` |
+| `confidenceLevel` | 0,5–0,99, Standard: `0.9` | Konfidenz für Typen `binary`, `factual` und `interval` |
 | `lowerBound` | Zahl | Untergrenze für Typ `interval` |
 | `upperBound` | Zahl | Obergrenze für Typ `interval` |
 | `unit` | Zeichenkette | Einheit für `interval`, z.B. `"km"`, `"°C"`, `"Mio. €"` |
