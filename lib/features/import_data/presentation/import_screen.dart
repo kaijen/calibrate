@@ -17,6 +17,7 @@ class _ImportState {
   final String? errorMessage;
   final bool importing;
   final bool imported;
+  final bool skipDuplicates;
 
   const _ImportState({
     this.parsedFile,
@@ -24,6 +25,7 @@ class _ImportState {
     this.errorMessage,
     this.importing = false,
     this.imported = false,
+    this.skipDuplicates = true,
   });
 
   _ImportState copyWith({
@@ -32,6 +34,7 @@ class _ImportState {
     String? errorMessage,
     bool? importing,
     bool? imported,
+    bool? skipDuplicates,
     bool clearError = false,
     bool clearFile = false,
   }) {
@@ -41,6 +44,7 @@ class _ImportState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       importing: importing ?? this.importing,
       imported: imported ?? this.imported,
+      skipDuplicates: skipDuplicates ?? this.skipDuplicates,
     );
   }
 }
@@ -62,6 +66,10 @@ class _ImportNotifier extends StateNotifier<_ImportState> {
 
   void setImported() {
     state = const _ImportState(imported: true);
+  }
+
+  void toggleSkipDuplicates() {
+    state = state.copyWith(skipDuplicates: !state.skipDuplicates);
   }
 
   void reset() {
@@ -133,7 +141,18 @@ class ImportScreen extends ConsumerWidget {
                 file: importState.parsedFile!,
                 filename: importState.filename ?? '',
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                value: importState.skipDuplicates,
+                onChanged: importState.importing
+                    ? null
+                    : (_) => notifier.toggleSkipDuplicates(),
+                title: const Text('Duplikate überspringen'),
+                subtitle: const Text(
+                    'Fragen mit gleichem Titel werden nicht erneut importiert'),
+                contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
@@ -216,9 +235,20 @@ class ImportScreen extends ConsumerWidget {
     final db = ref.read(appDatabaseProvider);
     final file = state.parsedFile!;
 
+    final existingTexts = state.skipDuplicates
+        ? (await db.getAllQuestions()).map((q) => q.questionText).toSet()
+        : <String>{};
+
+    final questionsToImport = state.skipDuplicates
+        ? file.questions
+            .where((q) => !existingTexts.contains(q.text))
+            .toList()
+        : file.questions;
+    final skippedCount = file.questions.length - questionsToImport.length;
+
     try {
       await db.transaction(() async {
-        for (final q in file.questions) {
+        for (final q in questionsToImport) {
           final tagsJson = jsonEncode(q.tags);
           final id = await db.insertQuestion(
             QuestionsCompanion.insert(
@@ -282,13 +312,23 @@ class ImportScreen extends ConsumerWidget {
           ImportBatchesCompanion.insert(
             filename: state.filename ?? 'unknown',
             source: drift.Value(file.source),
-            questionCount: file.questions.length,
+            questionCount: questionsToImport.length,
           ),
         );
       });
 
       ref.invalidate(predictionsStreamProvider);
       notifier.setImported();
+
+      if (context.mounted && skippedCount > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '$skippedCount ${skippedCount == 1 ? 'Frage' : 'Fragen'} '
+                'bereits vorhanden – übersprungen'),
+          ),
+        );
+      }
     } catch (e) {
       notifier.setError('Import fehlgeschlagen: $e');
     }

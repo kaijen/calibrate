@@ -588,6 +588,10 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
     try {
       final now = DateTime.now();
       final selectedIndices = _selectedQuestionIndices ?? {};
+
+      final existingTexts =
+          (await db.getAllQuestions()).map((q) => q.questionText).toSet();
+
       final questionsToImport = file.questions
           .asMap()
           .entries
@@ -596,8 +600,10 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
               !genState.excludePastDeadlines ||
               e.value.deadline == null ||
               !e.value.deadline!.isBefore(now))
+          .where((e) => !existingTexts.contains(e.value.text))
           .map((e) => e.value)
           .toList();
+      final skippedCount = selectedIndices.length - questionsToImport.length;
 
       await db.transaction(() async {
         for (final q in questionsToImport) {
@@ -673,10 +679,13 @@ class _AiGeneratorScreenState extends ConsumerState<AiGeneratorScreen> {
       notifier.setImported();
 
       if (context.mounted) {
+        String msg = '${questionsToImport.length} Fragen importiert';
+        if (skippedCount > 0) {
+          msg +=
+              ', $skippedCount ${skippedCount == 1 ? 'Duplikat' : 'Duplikate'} übersprungen';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text('${questionsToImport.length} Fragen importiert')),
+          SnackBar(content: Text(msg)),
         );
       }
     } catch (e) {
