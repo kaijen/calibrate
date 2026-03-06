@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-06
+
+### Added
+- AES-256-GCM encrypted full backup with PBKDF2-SHA256 key derivation;
+  create and restore `.kbak` files from Settings (#85)
+- Delete button in prediction detail screen AppBar with confirmation
+  dialog (#87)
+- Per-tab sort direction persisted via SharedPreferences; each tab
+  remembers its own sort order across sessions (#86)
+- Skip duplicate questions by default on import; configurable toggle
+  in the import screen (#84)
+- Full multi-select list in AI generator preview, all pre-selected;
+  replaces the static "first 5" preview (#83)
+- YAML template buttons for each prediction type in import screen
+- Share button in prediction list view; exports the active tab as JSON
+- Tag chip selector on new-prediction screen
+- Preselect existing tags in the bulk-edit dialog
+- "Ohne Tag" filter chip in statistics screen
+- Exact 5 % steps in calibration chart x-axis
+
+### Fixed
+- Invalid confidence values (< 0.5) in documentation examples (#82)
+
 ## [1.2.0] - 2026-03-05
 
 ### Breaking Changes
@@ -614,7 +637,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/kaijen/kailibrate/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/kaijen/kailibrate/compare/v1.0.0...v1.2.0
 [1.2.0-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.1.1-beta.1...v1.2.0-beta.1
 [1.1.1-beta.1]: https://github.com/kaijen/kailibrate/compare/v1.1.0-beta.1...v1.1.1-beta.1
