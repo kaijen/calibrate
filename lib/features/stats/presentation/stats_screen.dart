@@ -370,7 +370,7 @@ class _BinTable extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Text(
-                            '${((bin.binCenter - 0.05) * 100).round()}–${((bin.binCenter + 0.05) * 100).round()} %'),
+                            '${(bin.binCenter * 100).round()} %'),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),

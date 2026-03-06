@@ -63,20 +63,20 @@ class CalibrationStats {
     }
     ll = -ll / n;
 
-    // Calibration bins (5 bins: 50–60%, 60–70%, …, 90–100%)
-    final binData = List.generate(5, (_) => <double>[]);
+    // Calibration points at 5% steps: 50%, 55%, …, 100% (11 points)
+    final binData = List.generate(11, (_) => <double>[]);
     for (final p in pairs) {
-      final binIdx = ((p.probability - 0.5) * 10).floor().clamp(0, 4);
+      final binIdx = ((p.probability - 0.5) * 20).round().clamp(0, 10);
       binData[binIdx].add(p.outcome);
     }
 
     final bins = <CalibrationBin>[];
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 11; i++) {
       if (binData[i].isEmpty) continue;
       final hitRate =
           binData[i].reduce((a, b) => a + b) / binData[i].length;
       bins.add(CalibrationBin(
-        binCenter: 0.5 + (i * 0.1) + 0.05,
+        binCenter: 0.5 + (i * 0.05),
         count: binData[i].length,
         hitRate: hitRate,
       ));
