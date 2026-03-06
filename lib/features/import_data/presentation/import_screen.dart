@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:drift/drift.dart' as drift;
@@ -430,14 +433,11 @@ questions:
 ''';
 
   Future<void> _share(String yaml, String name) async {
+    final dir = await getTemporaryDirectory();
+    final file = File(p.join(dir.path, name));
+    await file.writeAsString(yaml.trim());
     await Share.shareXFiles(
-      [
-        XFile.fromData(
-          utf8.encode(yaml.trim()),
-          name: name,
-          mimeType: 'application/yaml',
-        ),
-      ],
+      [XFile(file.path, mimeType: 'application/yaml')],
       subject: 'Kailibrate-Vorlage',
     );
   }
