@@ -23,7 +23,7 @@ class NewPredictionScreen extends ConsumerStatefulWidget {
 class _NewPredictionScreenState extends ConsumerState<NewPredictionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _textController = TextEditingController();
-  final _tagsController = TextEditingController();
+  final _tagInputController = TextEditingController();
   final _unitController = TextEditingController();
 
   String _category = 'epistemic';
@@ -31,24 +31,33 @@ class _NewPredictionScreenState extends ConsumerState<NewPredictionScreen> {
   DateTime? _deadline;
   bool _saving = false;
   bool _estimateEnabled = false;
+  final List<String> _tags = [];
 
   @override
   void dispose() {
     _textController.dispose();
-    _tagsController.dispose();
+    _tagInputController.dispose();
     _unitController.dispose();
     super.dispose();
   }
 
-  List<String> get _parsedTags {
-    final raw = _tagsController.text.trim();
-    if (raw.isEmpty) return [];
-    return raw
-        .split(',')
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+  List<String> get _parsedTags => List.unmodifiable(_tags);
+
+  void _addTag(String tag) {
+    final t = tag.trim().toLowerCase();
+    if (t.isNotEmpty && !_tags.contains(t)) {
+      setState(() => _tags.add(t));
+    }
   }
+
+  void _addFromInput() {
+    for (final part in _tagInputController.text.split(',')) {
+      _addTag(part);
+    }
+    _tagInputController.clear();
+  }
+
+  void _removeTag(String tag) => setState(() => _tags.remove(tag));
 
   Future<void> _pickDeadline() async {
     final picked = await showDatePicker(
@@ -308,14 +317,67 @@ class _NewPredictionScreenState extends ConsumerState<NewPredictionScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            TextFormField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags',
-                hintText: 'z.B. gesundheit, wetter, technik',
-                helperText: 'Mehrere Tags durch Komma trennen',
-                border: OutlineInputBorder(),
+            if (_tags.isNotEmpty) ...[
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: _tags
+                    .map((tag) => InputChip(
+                          label: Text(tag),
+                          onDeleted: () => _removeTag(tag),
+                          visualDensity: VisualDensity.compact,
+                        ))
+                    .toList(),
               ),
+              const SizedBox(height: 8),
+            ],
+            TextField(
+              controller: _tagInputController,
+              decoration: InputDecoration(
+                labelText: 'Tag hinzufügen',
+                hintText: 'z.B. wetter',
+                helperText: 'Mehrere Tags durch Komma trennen + Enter',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addFromInput,
+                ),
+              ),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _addFromInput(),
+            ),
+            Consumer(
+              builder: (context, ref, _) {
+                final predictionsAsync = ref.watch(predictionsStreamProvider);
+                return predictionsAsync.maybeWhen(
+                  data: (predictions) {
+                    final existing = {
+                      for (final p in predictions) ...p.tagList,
+                    }..removeAll(_tags);
+                    if (existing.isEmpty) return const SizedBox.shrink();
+                    final sorted = existing.toList()..sort();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            'Vorhandene Tags:',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          ...sorted.map((tag) => ActionChip(
+                                label: Text(tag),
+                                onPressed: () => _addTag(tag),
+                                visualDensity: VisualDensity.compact,
+                              )),
+                        ],
+                      ),
+                    );
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                );
+              },
             ),
             const SizedBox(height: 24),
             Text(
