@@ -18,6 +18,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   String? _category;
   final Set<String> _types = {};
   final Set<String> _tags = {};
+  bool _filterUntagged = false;
 
   List<PredictionView> _filter(List<PredictionView> all) {
     return all.where((p) {
@@ -27,7 +28,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           !_types.contains(p.question.predictionType)) {
         return false;
       }
-      if (_tags.isNotEmpty && !p.tagList.any(_tags.contains)) return false;
+      if (_filterUntagged || _tags.isNotEmpty) {
+        final matchesUntagged = _filterUntagged && p.tagList.isEmpty;
+        final matchesTag = _tags.isNotEmpty && p.tagList.any(_tags.contains);
+        if (!matchesUntagged && !matchesTag) return false;
+      }
       return true;
     }).toList();
   }
@@ -36,6 +41,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         for (final p in predictions)
           if (p.status == PredictionStatus.resolved) ...p.tagList,
       };
+
+  bool _hasUntagged(List<PredictionView> predictions) => predictions.any(
+        (p) => p.status == PredictionStatus.resolved && p.tagList.isEmpty,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +57,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         error: (e, _) => Center(child: Text('Fehler: $e')),
         data: (predictions) {
           final allTags = _availableTags(predictions);
+          final hasUntagged = _hasUntagged(predictions);
           final filtered = _filter(predictions);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,11 +67,15 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 selectedTypes: _types,
                 selectedTags: _tags,
                 availableTags: allTags,
+                hasUntagged: hasUntagged,
+                filterUntagged: _filterUntagged,
                 onCategoryChanged: (c) => setState(() => _category = c),
                 onTypeToggled: (t) => setState(() =>
                     _types.contains(t) ? _types.remove(t) : _types.add(t)),
                 onTagToggled: (tag) => setState(() =>
                     _tags.contains(tag) ? _tags.remove(tag) : _tags.add(tag)),
+                onUntaggedToggled: () =>
+                    setState(() => _filterUntagged = !_filterUntagged),
               ),
               const Divider(height: 1),
               Expanded(child: _StatsView(predictions: filtered)),
@@ -78,18 +92,24 @@ class _FilterPanel extends StatelessWidget {
   final Set<String> selectedTypes;
   final Set<String> selectedTags;
   final Set<String> availableTags;
+  final bool hasUntagged;
+  final bool filterUntagged;
   final ValueChanged<String?> onCategoryChanged;
   final ValueChanged<String> onTypeToggled;
   final ValueChanged<String> onTagToggled;
+  final VoidCallback onUntaggedToggled;
 
   const _FilterPanel({
     required this.category,
     required this.selectedTypes,
     required this.selectedTags,
     required this.availableTags,
+    required this.hasUntagged,
+    required this.filterUntagged,
     required this.onCategoryChanged,
     required this.onTypeToggled,
     required this.onTagToggled,
+    required this.onUntaggedToggled,
   });
 
   static const _typeLabels = {
@@ -139,22 +159,35 @@ class _FilterPanel extends StatelessWidget {
             ),
           ),
           // Tag-Filter (multi-select, OR-verknüpft)
-          if (sortedTags.isNotEmpty) ...[
+          if (hasUntagged || sortedTags.isNotEmpty) ...[
             const SizedBox(height: 6),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: sortedTags.map((tag) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: FilterChip(
-                      label: Text(tag),
-                      selected: selectedTags.contains(tag),
-                      onSelected: (_) => onTagToggled(tag),
-                      visualDensity: VisualDensity.compact,
+                children: [
+                  if (hasUntagged)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: FilterChip(
+                        label: const Text('Ohne Tag'),
+                        avatar: const Icon(Icons.label_off_outlined, size: 16),
+                        selected: filterUntagged,
+                        onSelected: (_) => onUntaggedToggled(),
+                        visualDensity: VisualDensity.compact,
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ...sortedTags.map((tag) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: FilterChip(
+                        label: Text(tag),
+                        selected: selectedTags.contains(tag),
+                        onSelected: (_) => onTagToggled(tag),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    );
+                  }),
+                ],
               ),
             ),
           ],
