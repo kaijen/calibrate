@@ -625,7 +625,14 @@ class _FullscreenChartDialog extends StatelessWidget {
                 ),
               ],
             ),
-            Expanded(child: chart),
+            Expanded(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                minScale: 0.5,
+                maxScale: 8.0,
+                child: chart,
+              ),
+            ),
           ],
         ),
       ),
