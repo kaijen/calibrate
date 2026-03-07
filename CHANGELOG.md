@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0-beta.5] - 2026-03-07
+
+### Added
+- Overdue filter chip cycles through three states: no filter,
+  overdue only, not overdue only
+
 ## [1.7.0-beta.4] - 2026-03-07
 
 ### Added
@@ -694,7 +700,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.4...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.5...HEAD
+[1.7.0-beta.5]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.4...v1.7.0-beta.5
 [1.7.0-beta.4]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.3...v1.7.0-beta.4
 [1.7.0-beta.3]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.2...v1.7.0-beta.3
 [1.7.0-beta.2]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.1...v1.7.0-beta.2
