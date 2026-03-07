@@ -531,20 +531,32 @@ class _HistorySectionState extends State<_HistorySection> {
               style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 4),
           Text(
-            'Einzelwerte – grün: Treffer, rot: verfehlt. Tippen zum Öffnen.',
+            'Einzelwerte – grün: Treffer, rot: verfehlt',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 4),
-          Card(
-            child: WinklerHistoryChart(
-              points: winklerHistory,
-              onPointTap: (id) => context.push('/prediction/$id'),
-              onBackgroundTap: () => _openChartFullscreen(
-                context,
-                'Winkler Score – Verlauf',
-                WinklerHistoryChart(points: winklerHistory, expand: true),
+          Stack(
+            children: [
+              Card(child: WinklerHistoryChart(points: winklerHistory)),
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => _openChartFullscreen(
+                    context,
+                    'Winkler Score – Verlauf',
+                    WinklerHistoryChart(
+                      points: winklerHistory,
+                      expand: true,
+                      onPointTap: (id) {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        context.push('/prediction/$id');
+                      },
+                    ),
+                    subtitle: 'Datenpunkt tippen zum Öffnen der Schätzung',
+                  ),
+                  behavior: HitTestBehavior.opaque,
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ],
@@ -553,7 +565,8 @@ class _HistorySectionState extends State<_HistorySection> {
 }
 
 void _openChartFullscreen(
-    BuildContext context, String title, Widget chart) {
+    BuildContext context, String title, Widget chart,
+    {String? subtitle}) {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -562,7 +575,8 @@ void _openChartFullscreen(
     context: context,
     useSafeArea: false,
     barrierDismissible: true,
-    builder: (_) => _FullscreenChartDialog(title: title, chart: chart),
+    builder: (_) => _FullscreenChartDialog(
+        title: title, chart: chart, subtitle: subtitle),
   ).whenComplete(() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -575,9 +589,11 @@ void _openChartFullscreen(
 
 class _FullscreenChartDialog extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget chart;
 
-  const _FullscreenChartDialog({required this.title, required this.chart});
+  const _FullscreenChartDialog(
+      {required this.title, required this.chart, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -591,9 +607,16 @@ class _FullscreenChartDialog extends StatelessWidget {
               children: [
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(title,
+                          style: Theme.of(context).textTheme.titleMedium),
+                      if (subtitle != null)
+                        Text(subtitle!,
+                            style: Theme.of(context).textTheme.bodySmall),
+                    ],
                   ),
                 ),
                 IconButton(
