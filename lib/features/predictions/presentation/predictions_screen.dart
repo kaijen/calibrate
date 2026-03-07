@@ -34,7 +34,7 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
     FilterTab.needsResolution: false,
   };
   SharedPreferences? _prefs;
-  bool _showOverdueOnly = false;
+  bool? _overdueFilter; // null=alle, true=überfällig, false=nicht überfällig
   bool _filterUntagged = false;
   bool _sharing = false;
   String? _selectedCategory;
@@ -203,13 +203,13 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
           .where((p) => p.question.predictionType == _selectedPredictionType)
           .toList();
     }
-    if (_showOverdueOnly && tab != FilterTab.resolved) {
+    if (_overdueFilter != null && tab != FilterTab.resolved) {
       final now = DateTime.now();
-      list = list
-          .where((p) =>
-              p.question.deadline != null &&
-              p.question.deadline!.isBefore(now))
-          .toList();
+      list = list.where((p) {
+        final overdue = p.question.deadline != null &&
+            p.question.deadline!.isBefore(now);
+        return _overdueFilter! ? overdue : !overdue;
+      }).toList();
     }
     final reversed = _sortReversed[tab] ?? false;
     if (tab == FilterTab.resolved) {
@@ -502,11 +502,30 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
-              label: const Text('Überfällig'),
-              avatar: const Icon(Icons.warning_amber, size: 16),
-              selected: _showOverdueOnly,
-              onSelected: (_) =>
-                  setState(() => _showOverdueOnly = !_showOverdueOnly),
+              label: Text(switch (_overdueFilter) {
+                true => 'Überfällig',
+                false => 'Nicht überfällig',
+                null => 'Fälligkeit',
+              }),
+              avatar: Icon(
+                switch (_overdueFilter) {
+                  true => Icons.warning_amber,
+                  false => Icons.event_available,
+                  null => Icons.schedule,
+                },
+                size: 16,
+              ),
+              selected: _overdueFilter != null,
+              selectedColor: _overdueFilter == false
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : null,
+              onSelected: (_) => setState(() {
+                _overdueFilter = switch (_overdueFilter) {
+                  null => true,
+                  true => false,
+                  false => null,
+                };
+              }),
               visualDensity: VisualDensity.compact,
             ),
           ),
