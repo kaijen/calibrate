@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-07
+
+### Added
+- Fullscreen charts support x-axis zoom and pan via pinch gesture;
+  double-tap resets the view; axis labels recalculate for the
+  visible range (#91)
+- Category (Epistemisch/Aleatorisch) and prediction type
+  (Wahrscheinlichkeit, Ja/Nein, Faktual, Intervall) filter chips in
+  the prediction list; chips appear only when relevant (#93)
+- Overdue filter chip cycles through three states: no filter,
+  overdue only, not overdue only
+- Manual import shows full checkbox list with per-question selection;
+  duplicates are pre-deselected, struck through, and non-selectable;
+  imported count shown on button and success card (#94)
+
+### Fixed
+- Back navigation from a Winkler Score prediction detail now returns
+  to the fullscreen chart in its previous zoom state (#91)
+- Factual prediction type missing from type filter chips (#93)
+- Overdue filter had no effect on the resolved tab (#93)
+
 ## [1.7.0-beta.7] - 2026-03-07
 
 ### Fixed
@@ -714,7 +735,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.7...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/kaijen/kailibrate/compare/v1.6.0...v1.7.0
 [1.7.0-beta.7]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.6...v1.7.0-beta.7
 [1.7.0-beta.6]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.5...v1.7.0-beta.6
 [1.7.0-beta.5]: https://github.com/kaijen/kailibrate/compare/v1.7.0-beta.4...v1.7.0-beta.5
