@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-03-06
+
+### Fixed
+- Replace misleading Winkler Score mean card with a per-estimate
+  scatter chart; dots coloured green (hit) and red (miss) (#88)
+
 ## [1.4.0] - 2026-03-06
 
 ### Added
@@ -648,7 +654,8 @@ breaking changes will follow semver and require a major version bump.
 - Settings screen, tag filter, and clipboard import for question sets
 - GitHub Actions release workflow for tag-triggered APK builds
 
-[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/kaijen/kailibrate/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/kaijen/kailibrate/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/kaijen/kailibrate/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/kaijen/kailibrate/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/kaijen/kailibrate/compare/v1.0.0...v1.2.0
