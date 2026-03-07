@@ -13,18 +13,30 @@ class WinklerHistoryChart extends StatelessWidget {
     this.expand = false,
   });
 
+  // --- log10 helpers ---
+
+  static double _toLog(double v) => log(max(v, 1e-10)) / ln10;
+  static double _fromLog(double logV) => pow(10, logV).toDouble();
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     final xMin = points.first.index.toDouble();
     final xMax = points.last.index.toDouble();
-    final values = points.map((p) => p.score).toList();
-    final maxVal = values.reduce(max);
-    final yMax = maxVal * 1.2;
 
-    final spots = [
-      for (final p in points) FlSpot(p.index.toDouble(), p.score),
+    // Transform scores to log10 space for plotting.
+    final logValues = [for (final p in points) _toLog(p.score)];
+    final logMin = logValues.reduce(min);
+    final logMax = logValues.reduce(max);
+
+    // Ensure at least one full decade of visible range.
+    final yMinLog = min(logMin - 0.3, logMax - 1.0).floorToDouble();
+    final yMaxLog = max(logMax + 0.3, logMin + 1.0).ceilToDouble();
+
+    final logSpots = [
+      for (var i = 0; i < points.length; i++)
+        FlSpot(points[i].index.toDouble(), logValues[i]),
     ];
 
     final xRange = max(xMax - xMin, 1.0);
@@ -38,8 +50,6 @@ class WinklerHistoryChart extends StatelessWidget {
                     ? 20.0
                     : 50.0;
 
-    final yInterval = _yInterval(yMax);
-
     final hitColor = Colors.green.shade600;
     final missColor = cs.error;
 
@@ -49,12 +59,12 @@ class WinklerHistoryChart extends StatelessWidget {
         LineChartData(
           minX: xMin,
           maxX: xMax,
-          minY: 0,
-          maxY: yMax,
+          minY: yMinLog,
+          maxY: yMaxLog,
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: yInterval,
+            horizontalInterval: 1.0, // one grid line per decade
             getDrawingHorizontalLine: (_) => FlLine(
               color: cs.outline.withOpacity(0.2),
               strokeWidth: 1,
@@ -69,14 +79,20 @@ class WinklerHistoryChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 52,
-                interval: yInterval,
-                getTitlesWidget: (v, _) => Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Text(
-                    _formatScore(v),
-                    style: const TextStyle(fontSize: 9),
-                  ),
-                ),
+                interval: 1.0,
+                getTitlesWidget: (v, _) {
+                  // Only label at integer decade positions.
+                  if ((v - v.roundToDouble()).abs() > 0.01) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Text(
+                      _formatScore(_fromLog(v)),
+                      style: const TextStyle(fontSize: 9),
+                    ),
+                  );
+                },
               ),
             ),
             bottomTitles: AxisTitles(
@@ -102,7 +118,7 @@ class WinklerHistoryChart extends StatelessWidget {
           ),
           lineBarsData: [
             LineChartBarData(
-              spots: spots,
+              spots: logSpots,
               isCurved: false,
               color: cs.outline.withOpacity(0.25),
               barWidth: 1,
@@ -128,22 +144,12 @@ class WinklerHistoryChart extends StatelessWidget {
     return expand ? chart : AspectRatio(aspectRatio: 2.5, child: chart);
   }
 
-  double _yInterval(double yMax) {
-    if (yMax <= 0) return 1;
-    final magnitude =
-        pow(10, (log(yMax) / ln10).floor()).toDouble();
-    final normalized = yMax / magnitude;
-    if (normalized <= 2) return magnitude * 0.5;
-    if (normalized <= 5) return magnitude;
-    return magnitude * 2;
-  }
-
   String _formatScore(double v) {
-    if (v == 0) return '0';
     if (v >= 1e6) return '${(v / 1e6).toStringAsFixed(1)}M';
     if (v >= 1e3) return '${(v / 1e3).toStringAsFixed(1)}k';
     if (v >= 100) return v.toStringAsFixed(0);
-    if (v >= 10) return v.toStringAsFixed(1);
+    if (v >= 10) return v.toStringAsFixed(0);
+    if (v >= 1) return v.toStringAsFixed(1);
     return v.toStringAsFixed(2);
   }
 }
