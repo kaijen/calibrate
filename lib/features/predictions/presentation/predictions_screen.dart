@@ -37,6 +37,8 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
   bool _showOverdueOnly = false;
   bool _filterUntagged = false;
   bool _sharing = false;
+  String? _selectedCategory;
+  String? _selectedPredictionType;
 
   // Wird in build() aktualisiert – für Select-All ohne extra State.
   List<PredictionView> _currentPredictions = [];
@@ -190,6 +192,16 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
         if (_filterUntagged && p.tagList.isEmpty) return true;
         return p.tagList.any(_selectedTags.contains);
       }).toList();
+    }
+    if (_selectedCategory != null) {
+      list = list
+          .where((p) => p.question.category == _selectedCategory)
+          .toList();
+    }
+    if (_selectedPredictionType != null) {
+      list = list
+          .where((p) => p.question.predictionType == _selectedPredictionType)
+          .toList();
     }
     if (_showOverdueOnly && tab != FilterTab.resolved) {
       final now = DateTime.now();
@@ -422,6 +434,65 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
 
   Widget _buildTagFilter(Set<String> allTags, {required bool hasUntagged}) {
     final tags = allTags.toList()..sort();
+
+    final hasEpistemic =
+        _currentPredictions.any((p) => p.question.category == 'epistemic');
+    final hasAleatory =
+        _currentPredictions.any((p) => p.question.category == 'aleatory');
+    final hasProbability = _currentPredictions
+        .any((p) => p.question.predictionType == 'probability');
+    final hasBinary =
+        _currentPredictions.any((p) => p.question.predictionType == 'binary');
+    final hasInterval =
+        _currentPredictions.any((p) => p.question.predictionType == 'interval');
+
+    final showCategoryFilter = hasEpistemic && hasAleatory;
+    final typeCount = [hasProbability, hasBinary, hasInterval]
+        .where((b) => b)
+        .length;
+    final showTypeFilter = typeCount > 1;
+
+    final tertiary = Theme.of(context).colorScheme.tertiary;
+    final tertiaryContainer = Theme.of(context).colorScheme.tertiaryContainer;
+    final onTertiaryContainer =
+        Theme.of(context).colorScheme.onTertiaryContainer;
+
+    Widget categoryChip(String value, String label) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: FilterChip(
+            label: Text(label),
+            selected: _selectedCategory == value,
+            onSelected: (_) => setState(() {
+              _selectedCategory = _selectedCategory == value ? null : value;
+            }),
+            visualDensity: VisualDensity.compact,
+            selectedColor: tertiaryContainer,
+            checkmarkColor: onTertiaryContainer,
+            side: BorderSide(color: tertiary.withValues(alpha: 0.5)),
+          ),
+        );
+
+    final secondary = Theme.of(context).colorScheme.secondary;
+    final secondaryContainer = Theme.of(context).colorScheme.secondaryContainer;
+    final onSecondaryContainer =
+        Theme.of(context).colorScheme.onSecondaryContainer;
+
+    Widget typeChip(String value, String label) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: FilterChip(
+            label: Text(label),
+            selected: _selectedPredictionType == value,
+            onSelected: (_) => setState(() {
+              _selectedPredictionType =
+                  _selectedPredictionType == value ? null : value;
+            }),
+            visualDensity: VisualDensity.compact,
+            selectedColor: secondaryContainer,
+            checkmarkColor: onSecondaryContainer,
+            side: BorderSide(color: secondary.withValues(alpha: 0.5)),
+          ),
+        );
+
     return SizedBox(
       height: 48,
       child: ListView(
@@ -449,32 +520,49 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen>
                 onSelected: (_) =>
                     setState(() => _filterUntagged = !_filterUntagged),
                 visualDensity: VisualDensity.compact,
-                selectedColor:
-                    Theme.of(context).colorScheme.secondaryContainer,
-                checkmarkColor:
-                    Theme.of(context).colorScheme.onSecondaryContainer,
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondary
-                      .withValues(alpha: 0.6),
+                selectedColor: secondaryContainer,
+                checkmarkColor: onSecondaryContainer,
+                side: BorderSide(color: secondary.withValues(alpha: 0.6)),
+              ),
+            ),
+          if (showCategoryFilter) ...[
+            _divider(),
+            categoryChip('epistemic', 'Epistemisch'),
+            categoryChip('aleatory', 'Aleatorisch'),
+          ],
+          if (showTypeFilter) ...[
+            _divider(),
+            if (hasProbability) typeChip('probability', 'Wahrscheinlichkeit'),
+            if (hasBinary) typeChip('binary', 'Ja/Nein'),
+            if (hasInterval) typeChip('interval', 'Intervall'),
+          ],
+          if (tags.isNotEmpty) ...[
+            _divider(),
+            for (final tag in tags)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text(tag),
+                  selected: _selectedTags.contains(tag),
+                  onSelected: (_) => _toggleTag(tag),
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
-            ),
-          for (final tag in tags)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilterChip(
-                label: Text(tag),
-                selected: _selectedTags.contains(tag),
-                onSelected: (_) => _toggleTag(tag),
-                visualDensity: VisualDensity.compact,
-              ),
-            ),
+          ],
         ],
       ),
     );
   }
+
+  Widget _divider() => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: VerticalDivider(
+          width: 1,
+          indent: 10,
+          endIndent: 10,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      );
 }
 
 class _PredictionList extends StatelessWidget {
